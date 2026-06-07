@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Hérite du parent Pulse : release 21, BOM Boot 4 (Reactor 2025.0, JUnit 5),
+         pluginManagement (compiler/surefire). On ne pinne donc ni reactor-core,
+         ni reactor-test, ni junit : tout vient du BOM. -->
+    <parent>
+        <groupId>fr.janus.pulse</groupId>
+        <artifactId>pulse-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>reactor-demo</artifactId>
+
+    <name>Pulse (katas Reactor)</name>
+    <description>Exercices Reactor autonomes (Flux/Mono) — support pédagogique</description>
+
+    <properties>
+        <!-- javafaker n'est pas géré par le BOM Boot : seule version pinnée du module. -->
+        <javafaker.version>1.0.2</javafaker.version>
+    </properties>
+
+    <dependencies>
+        <!-- Cœur réactif : version alignée par le BOM Reactor 2025.0. -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+
+        <!-- Génération de données factices pour les katas (hors BOM). -->
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>${javafaker.version}</version>
+        </dependency>
+
+        <!-- Tests réactifs : StepVerifier. Versions gérées par le BOM. -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

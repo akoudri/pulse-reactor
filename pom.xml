@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>fr.janus.pulse</groupId>
+    <artifactId>pulse-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Pulse (parent)</name>
+    <description>Agrégateur de télémétrie — fil rouge formation Spring Reactor</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
+        <!-- Version du train Spring Boot 4.0.x GA. Le BOM aligne Reactor 2025.0,
+             Jackson 3, Jakarta EE 11, JSpecify, JUnit 5. On ne pinne rien d'autre. -->
+        <spring-boot.version>4.0.3</spring-boot.version>
+    </properties>
+
+    <modules>
+        <module>pulse-common</module>
+        <module>reactor</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Import du BOM Spring Boot 4 : toutes les versions Spring/Reactor/
+                 Testcontainers/JUnit en découlent. Pas d'héritage du starter-parent
+                 pour garder un multi-modules neutre. -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <!-- Sans héritage du starter-parent, le BOM ne fournit pas la gestion des
+             plugins de build. On pinne donc explicitement les plugins (versions de
+             build, pas de dépendances applicatives) : compiler récent pour honorer
+             <release>21</release>, surefire récent pour exécuter JUnit 5. -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <!-- Conserve les noms de paramètres dans le bytecode : requis pour
+                             que @PathVariable/@RequestParam infèrent leur nom (comportement
+                             par défaut de spring-boot-starter-parent, qu'on ne hérite pas). -->
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.2.5</version>
+                </plugin>
+                <!-- Plugin Boot : version alignée sur le BOM (repackage des apps exécutables). -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
