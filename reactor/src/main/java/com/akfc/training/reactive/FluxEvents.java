@@ -5,12 +5,20 @@ import reactor.core.publisher.Flux;
 public class FluxEvents {
 
     public static void main(String[] args) {
-        //TODO: observe the lifecycle events of a Flux with doOn* callbacks
-        //step 1: create a Flux emitting the range 1..18
-        //step 2: collect all elements into a list (collectList), then flatten the list
-        //        back into a Flux (flatMapIterable). What did we gain/lose by doing this?
-        //step 3: add a doOnNext callback printing "Processing <value>" for each element
-        //step 4: add a doOnComplete callback printing "Finished"
-        //step 5: subscribe and print each value; compare the order of the printed lines
+        /*Flux.range(1, 50)
+                .map(e -> e * e)
+                //.doOnNext(e -> System.out.println("Valeur sortie du map = " + e))
+                .doOnComplete(() -> System.out.println("Map Completed"))
+                .doOnCancel(() -> System.out.println("Map cancelled"))
+                .filter(e -> e % 2 == 0)
+                .doOnCancel(() -> System.out.println("Filter cancelled"))
+                .take(20)
+                .subscribe(System.out::println);*/
+
+        Flux.range(1, 50)
+                .handle((data, sink) -> {
+                    int v = data * data;
+                    if (v % 2 == 0) sink.next(v);
+                }).subscribe(System.out::println);
     }
 }

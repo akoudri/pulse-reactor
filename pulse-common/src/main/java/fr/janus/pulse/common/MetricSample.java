@@ -10,5 +10,5 @@ import java.time.Instant;
  * @param value   valeur mesurée
  * @param at      instant de la mesure
  */
-public record MetricSample() {
+public record MetricSample(String agentId, String name, double value, Instant at) {
 }

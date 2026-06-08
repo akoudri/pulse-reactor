@@ -26,8 +26,13 @@ public final class IngestionPipeline {
      * @return flux normalisé (lazy : non souscrit ici)
      */
     public Flux<MetricSample> normalize(Flux<MetricSample> raw) {
-        //TODO
-        return Flux.empty();
+        return raw
+                .filter(sample -> sample.value() >= 0)
+                .map(sample -> new MetricSample(
+                        sample.agentId(),
+                        prefixed(sample.name()),
+                        roundTo2Decimals(sample.value()),
+                        sample.at()));
     }
 
     private static String prefixed(String name) {

@@ -13,20 +13,16 @@ public class MonoCreate {
     }
 
     public static Mono<String> fullName() {
-        //Step 1: create the Mono with Mono.just(getFullName()) and run the program.
-        //        When is "Generating name..." printed: at assembly time or at subscription time?
-        //Step 2: now create the Mono with a supplier (Mono.fromSupplier and a method reference
-        //        to getFullName). Run again and compare: which version is lazy?
-        return null;
+        return Mono.just(getFullName());
+        //return Mono.fromSupplier(MonoCreate::getFullName);
     }
 
     public static void main(String[] args) throws InterruptedException {
-        //TODO: build the processing pipeline
-        //step 1: call fullName() and add a log() to trace the reactive signals
-        //step 2: map the name to upper case, then add another log() — observe where
-        //        each signal travels in the chain
-        //step 3: subscribe with three callbacks: print the value, print the stack trace
-        //        on error, and print "Processing completed" on completion
+        Mono<String> m = fullName();
+        Thread.sleep(3000);
+        m.subscribe(System.out::println, Throwable::printStackTrace, () -> System.out.println("Processing Completed"));
+        /*String message = fullName().block();
+        System.out.println(message);*/
     }
 
 }
