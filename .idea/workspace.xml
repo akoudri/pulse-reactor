@@ -5,14 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a64751c8-cac3-431c-94a2-2d31424f10c2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxCreate.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxEvents.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxEvents.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxFlatMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxFlatMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxGenerate.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxGenerate.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/MonoCreate.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/MonoCreate.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/MultiCastFlux.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/MultiCastFlux.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/ReactiveStreamExercise.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/ReactiveStreamExercise.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxErrors.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxErrors.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +47,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.FluxCreate.executor": "Run",
+    "Application.FluxErrors.executor": "Run",
     "Application.FluxEvents.executor": "Run",
     "Application.FluxFlatMap.executor": "Run",
     "Application.FluxGenerate.executor": "Run",
@@ -75,9 +70,9 @@
     "nodejs_package_manager_path": "npm"
   }
 }]]></component>
-  <component name="RunManager" selected="Application.MultiCastFlux">
-    <configuration name="FluxCreate" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.akfc.training.reactive.FluxCreate" />
+  <component name="RunManager" selected="Application.FluxErrors">
+    <configuration name="FluxErrors" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.akfc.training.reactive.FluxErrors" />
       <module name="pulse-reactor-katas" />
       <extension name="coverage">
         <pattern>
@@ -149,11 +144,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.FluxErrors" />
         <item itemvalue="Application.MultiCastFlux" />
         <item itemvalue="Application.FluxFlatMap" />
         <item itemvalue="Application.FluxEvents" />
         <item itemvalue="Application.FluxGenerate" />
-        <item itemvalue="Application.FluxCreate" />
       </list>
     </recent_temporary>
   </component>

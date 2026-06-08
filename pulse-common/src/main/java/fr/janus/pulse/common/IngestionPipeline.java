@@ -1,6 +1,9 @@
 package fr.janus.pulse.common;
 
+import java.time.Duration;
+
 import reactor.core.publisher.Flux;
+import reactor.util.retry.Retry;
 
 /**
  * Pipeline d'ingestion <em>pur</em> : il décrit une transformation de flux, il ne
@@ -13,6 +16,15 @@ import reactor.core.publisher.Flux;
 public final class IngestionPipeline {
 
     private static final String PREFIX = "pulse.";
+
+    /**
+     * Borne de concurrence du fan-out d'enrichissement. Explicite (pas l'illimité par
+     * défaut de {@code flatMap}) pour ne pas écrouler l'annuaire distant sous charge.
+     */
+    private static final int ENRICH_CONCURRENCY = 8;
+
+    /** Repli de région quand l'annuaire reste indisponible après les retries. */
+    private static final String UNKNOWN_REGION = "unknown";
 
     /**
      * Normalise un flux d'échantillons bruts :
@@ -33,6 +45,40 @@ public final class IngestionPipeline {
                         prefixed(sample.name()),
                         roundTo2Decimals(sample.value()),
                         sample.at()));
+    }
+
+    /**
+     * Enrichit chaque échantillon de sa région, résolue via l'{@link AgentDirectory}.
+     *
+     * <p>Choix <strong>{@code flatMap}</strong> et non {@code concatMap} : l'ordre des
+     * {@link EnrichedSample} n'est pas significatif (chaque échantillon est autonome),
+     * donc on laisse les appels distants s'entrelacer pour ne pas sérialiser la latence.
+     * {@code concatMap} préserverait l'ordre source mais sérialiserait les appels →
+     * latence cumulée. La concurrence est <em>bornée</em> ({@link #ENRICH_CONCURRENCY}).
+     *
+     * <p>Chaque appel est protégé, dans cet ordre :
+     * <ol>
+     *   <li>{@code timeout(2s)} — appliqué au {@link reactor.core.publisher.Mono} interne,
+     *       donc <em>par échantillon</em> (pas sur le flux global) ; un dépassement émet
+     *       une erreur qui déclenche le retry ;</li>
+     *   <li>{@code retryWhen(Retry.backoff(3, 200ms))} — back-off exponentiel ;</li>
+     *   <li>{@code onErrorReturn("unknown")} — repli en dernier recours une fois les
+     *       retries épuisés, plutôt que de propager l'erreur (un échantillon non résolu
+     *       ne doit pas casser tout le flux).</li>
+     * </ol>
+     *
+     * @param normalized flux d'échantillons déjà normalisés
+     * @param directory  annuaire de résolution de région
+     * @return flux enrichi (lazy : non souscrit ici)
+     */
+    public Flux<EnrichedSample> enrich(Flux<MetricSample> normalized, AgentDirectory directory) {
+        return normalized.flatMap(sample ->
+                        directory.regionOf(sample.agentId())
+                                .timeout(Duration.ofSeconds(2))
+                                .retryWhen(Retry.backoff(3, Duration.ofMillis(200)))
+                                .onErrorReturn(UNKNOWN_REGION)
+                                .map(region -> new EnrichedSample(sample, region)),
+                ENRICH_CONCURRENCY);
     }
 
     private static String prefixed(String name) {
