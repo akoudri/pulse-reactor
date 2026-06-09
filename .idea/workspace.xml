@@ -5,14 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a64751c8-cac3-431c-94a2-2d31424f10c2" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/CompoExample.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/labs/lab-j1-2.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j1-2.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/labs/lab-j2-1.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j2-1.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/labs/lab-j2-2.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j2-2.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/labs/lab-j3-1.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j3-1.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/labs/lab-j3-2.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j3-2.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/labs/lab-j4-1.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j4-1.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/labs/lab-j4-2.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j4-2.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxCreate.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxCreate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxFlatMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxFlatMap.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,6 +48,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.CompoExample.executor": "Run",
     "Application.FluxCreate.executor": "Run",
     "Application.FluxErrors.executor": "Run",
     "Application.FluxEvents.executor": "Run",
@@ -76,7 +73,33 @@
     "nodejs_package_manager_path": "npm"
   }
 }]]></component>
-  <component name="RunManager" selected="Application.FluxErrors">
+  <component name="RunManager" selected="Application.FluxFlatMap">
+    <configuration name="CompoExample" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.akfc.training.reactive.CompoExample" />
+      <module name="pulse-reactor-katas" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.akfc.training.reactive.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="FluxCreate" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.akfc.training.reactive.FluxCreate" />
+      <module name="pulse-reactor-katas" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.akfc.training.reactive.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="FluxErrors" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.akfc.training.reactive.FluxErrors" />
       <module name="pulse-reactor-katas" />
@@ -90,34 +113,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="FluxEvents" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.akfc.training.reactive.FluxEvents" />
-      <module name="pulse-reactor-katas" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.akfc.training.reactive.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="FluxFlatMap" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.akfc.training.reactive.FluxFlatMap" />
-      <module name="pulse-reactor-katas" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.akfc.training.reactive.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="FluxGenerate" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.akfc.training.reactive.FluxGenerate" />
       <module name="pulse-reactor-katas" />
       <extension name="coverage">
         <pattern>
@@ -150,11 +147,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.FluxFlatMap" />
+        <item itemvalue="Application.FluxCreate" />
+        <item itemvalue="Application.CompoExample" />
         <item itemvalue="Application.FluxErrors" />
         <item itemvalue="Application.MultiCastFlux" />
-        <item itemvalue="Application.FluxFlatMap" />
-        <item itemvalue="Application.FluxEvents" />
-        <item itemvalue="Application.FluxGenerate" />
       </list>
     </recent_temporary>
   </component>
