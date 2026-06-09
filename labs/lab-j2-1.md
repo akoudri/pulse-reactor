@@ -61,7 +61,7 @@ Lancez `mvn verify`.
       `thenRequest`, et les trois stratégies sont distinctes et commentées.
 - [ ] `checkpoint()` présent ; commentaire sur `ReactorDebugAgent` vs `Hooks.onOperatorDebug()`.
 
-## Points à faire verbaliser
+## Points à verbaliser
 
 - `subscribeOn` agit sur **toute la chaîne en amont** quel que soit son emplacement ;
   `publishOn` ne déplace que **l'aval** de son point d'insertion. Le démontrer sur les logs.

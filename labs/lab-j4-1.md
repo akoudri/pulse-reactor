@@ -63,7 +63,7 @@ Boot (aucun pin manuel). Documentez les gates dans le README.
 - [ ] Workflow CI bloquant pour le merge : build + unit + intégration + BlockHound ; versions via BOM.
 - [ ] Aucun pin de version sur les libs gérées par le BOM.
 
-## Points à faire verbaliser
+## Points à verbaliser
 
 - Pourquoi PublisherProbe est-il plus fiable qu'un compteur maison pour prouver qu'une branche a été prise ?
 - Qu'est-ce qu'un test H2 « à la place » de R2DBC pourrait masquer ou inventer comme bug ?

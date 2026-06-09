@@ -56,7 +56,7 @@ Test : un appel HTTP avec un header `X-Trace-Id` se retrouve corrélé du filtre
 - [ ] Aucune lecture de `ThreadLocal` nu au fond du pipeline pour le contexte transverse.
 - [ ] `Hooks.enableAutomaticContextPropagation()` appelé une fois au démarrage.
 
-## Points à faire verbaliser
+## Points à verbaliser
 
 - Pourquoi, **sans** la propagation, le `traceId` du MDC disparaît-il entre le filtre et le log SQL ? (changement de thread, `ThreadLocal` perdu).
 - Dans quel sens circule le `Context` — et pourquoi écrit-on le `contextWrite` dans le `WebFilter` (près de la souscription) ?

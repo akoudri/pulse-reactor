@@ -63,7 +63,7 @@ public Report report(@PathVariable Long id) {
 - [ ] `docs/decision-migration.md` : reco argumentée sur le snippet + runbook SLO/SLI complet.
 - [ ] La reco s'appuie sur la **grille** et les **mesures**, pas sur une préférence.
 
-## Points à faire verbaliser
+## Points à verbaliser
 
 - Sur le snippet legacy : deux appels bloquants + un calcul léger — que disent la grille ET les chiffres ? (souvent : MVC+Loom suffit, voire hybride si forte concurrence).
 - À charge égale, combien de threads tient chaque modèle ? Où diverge la p99 ?

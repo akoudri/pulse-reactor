@@ -58,7 +58,7 @@ frontière Kafka → pipeline → SSE et apparaît dans les logs corrélés.
 - [ ] `/actuator/prometheus` expose les métriques d'ingestion/agrégation.
 - [ ] Un même `traceId` est corrélé de l'ingestion Kafka jusqu'au push SSE.
 
-## Points à faire verbaliser
+## Points à verbaliser
 
 - Pourquoi Kafka offre-t-il un backpressure « naturel » (pull/poll), et où ce backpressure s'arrête-t-il (le pont `Sinks`) ?
 - Quand le hedging est-il justifié, et pourquoi seulement sur des appels idempotents ?

@@ -52,7 +52,7 @@ avec `normalize`).
       `Thread.sleep`, et le test s'exécute en quelques ms malgré les back-off de 200 ms.
 - [ ] Aucun `block()` / `subscribe()` dans le code de production.
 
-## Points à faire verbaliser
+## Points à verbaliser
 
 - Pourquoi `withVirtualTime` prend un **`Supplier<Publisher>`** et pas un flux déjà
   construit ? (le scheduler virtuel doit exister *avant* l'assemblage du flux temporel).

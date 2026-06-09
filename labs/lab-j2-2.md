@@ -75,7 +75,7 @@ comparaison.
 - [ ] Gatling tourne contre les deux apps et produit deux rapports comparables.
 - [ ] `mvn verify` vert sur les trois modules.
 
-## Points à faire verbaliser
+## Points à verbaliser
 
 - Sur le fan-out, qu'observe-t-on entre les deux implémentations quand l'upstream lent répond en 700 ms et que la charge monte ? (le réactif ne consomme pas un thread par requête en attente).
 - Le jumeau avec virtual threads tient-il le CRUD aussi bien que le réactif ? (souvent oui — c'est le point honnête).

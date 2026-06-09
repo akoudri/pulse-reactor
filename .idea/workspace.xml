@@ -6,7 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="a64751c8-cac3-431c-94a2-2d31424f10c2" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxErrors.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/FluxErrors.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/labs/lab-j1-2.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j1-2.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/labs/lab-j2-1.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j2-1.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/labs/lab-j2-2.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j2-2.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/labs/lab-j3-1.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j3-1.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/labs/lab-j3-2.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j3-2.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/labs/lab-j4-1.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j4-1.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/labs/lab-j4-2.md" beforeDir="false" afterPath="$PROJECT_DIR$/labs/lab-j4-2.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
