@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fr.janus.pulse</groupId>
+        <artifactId>pulse-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>pulse-mvc-loom</artifactId>
+    <name>Pulse MVC + Loom</name>
+    <description>Jumeau impératif : Spring MVC + virtual threads (port 8081). Même contrat d'API.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>fr.janus.pulse</groupId>
+            <artifactId>pulse-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- TODO : ajouter les dépendances du jumeau MVC+Loom (cf. lab Partie D) :
+               - Spring MVC (servlet) — PAS de WebFlux ici ; apporte aussi RestClient ;
+               - Bean Validation ;
+               - dépendances de test : starter-test, et un stub d'upstreams (WireMock). -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

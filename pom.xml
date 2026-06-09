@@ -22,6 +22,9 @@
 
     <modules>
         <module>pulse-common</module>
+        <module>pulse-reactive</module>
+        <module>pulse-mvc-loom</module>
+        <module>pulse-loadtest</module>
         <module>reactor</module>
     </modules>
 

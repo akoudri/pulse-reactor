@@ -21,6 +21,13 @@
             <artifactId>jspecify</artifactId>
         </dependency>
 
+        <!-- Contraintes Bean Validation portées par les DTO du contrat (ni web ni data,
+             API seule : conforme au périmètre de pulse-common). Version via BOM. -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+
         <!-- Reactor core : fourni par le BOM (Reactor 2025.0). Aucune version pinnée. -->
         <dependency>
             <groupId>io.projectreactor</groupId>

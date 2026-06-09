@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fr.janus.pulse</groupId>
+        <artifactId>pulse-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>pulse-loadtest</artifactId>
+    <name>Pulse Load Test</name>
+    <description>Différentiel de charge Gatling (DSL Java) : réactif (8080) vs jumeau MVC+Loom (8081).</description>
+
+    <!-- TODO (Partie E) : déclarer les versions Gatling (hors BOM Spring).
+         Vérifier la version courante du plugin + du moteur dans la doc officielle Gatling. -->
+
+    <dependencies>
+        <!-- TODO (Partie E) : ajouter le DSL Java + moteur Gatling (scope test :
+             la simulation vit dans src/test/java). -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- TODO (Partie E) : configurer le gatling-maven-plugin.
+                 Astuce : sans liaison de phase, `mvn verify` compile la simulation mais ne
+                 la LANCE PAS ; le tir se fait via `mvn gatling:test` (cf. README.md),
+                 une fois les deux apps + l'upstream-sim démarrés. -->
+        </plugins>
+    </build>
+</project>

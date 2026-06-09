@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fr.janus.pulse</groupId>
+        <artifactId>pulse-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>pulse-reactive</artifactId>
+    <name>Pulse Reactive</name>
+    <description>API réactive : WebFlux + Reactor (port 8080). Jumeau réactif du différentiel.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>fr.janus.pulse</groupId>
+            <artifactId>pulse-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- TODO : ajouter les dépendances du module réactif (cf. lab Parties A à C) :
+               - serveur réactif WebFlux + Reactor ;
+               - WebClient (fan-out de la Partie B) ;
+               - Bean Validation (@Valid @RequestBody) ;
+               - dépendances de test : starter-test, reactor-test, et un stub d'upstreams
+                 (WireMock) pour le test du fan-out. -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

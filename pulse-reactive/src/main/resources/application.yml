@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: pulse-reactive
+
+# TODO (Partie A) : configurer le port HTTP (8080).
+#
+# TODO (Partie B) : configurer les upstreams interrogés par le fan-out
+#   /api/health/aggregate :
+#   pulse.upstream.base-url  -> upstream-sim (port 8089)
+#   pulse.upstream.endpoints -> liste { name, path } : fast / slow / unstable
