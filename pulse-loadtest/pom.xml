@@ -14,20 +14,34 @@
     <name>Pulse Load Test</name>
     <description>Différentiel de charge Gatling (DSL Java) : réactif (8080) vs jumeau MVC+Loom (8081).</description>
 
-    <!-- TODO (Partie E) : déclarer les versions Gatling (hors BOM Spring).
-         Vérifier la version courante du plugin + du moteur dans la doc officielle Gatling. -->
+    <properties>
+        <!-- Versions Gatling hors BOM Spring : pinnées ici. Paire compatible (plugin 4.x +
+             gatling core 3.13.x). À reconfirmer/bumper via context7/web avant un vrai tir. -->
+        <gatling.version>3.13.0</gatling.version>
+        <gatling-maven-plugin.version>4.13.0</gatling-maven-plugin.version>
+    </properties>
 
     <dependencies>
-        <!-- TODO (Partie E) : ajouter le DSL Java + moteur Gatling (scope test :
-             la simulation vit dans src/test/java). -->
+        <!-- DSL Java + moteur Gatling (apporte gatling-core-java / gatling-http-java).
+             Scope test : la simulation vit dans src/test/java. -->
+        <dependency>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>${gatling.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- TODO (Partie E) : configurer le gatling-maven-plugin.
-                 Astuce : sans liaison de phase, `mvn verify` compile la simulation mais ne
-                 la LANCE PAS ; le tir se fait via `mvn gatling:test` (cf. README.md),
-                 une fois les deux apps + l'upstream-sim démarrés. -->
+            <!-- Plugin Gatling SANS liaison de phase : `mvn verify` compile la simulation
+                 mais ne la LANCE PAS. Le tir se fait explicitement via `mvn gatling:test`
+                 (voir README.md), une fois les deux apps + l'upstream-sim démarrés. -->
+            <plugin>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-maven-plugin</artifactId>
+                <version>${gatling-maven-plugin.version}</version>
+            </plugin>
         </plugins>
     </build>
 </project>

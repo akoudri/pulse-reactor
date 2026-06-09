@@ -22,6 +22,6 @@ public class MetricStreamController {
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream() {
-        // TODO : enregistrer un nouvel abonné SSE (broadcaster.subscribe()).
+        return broadcaster.subscribe();
     }
 }

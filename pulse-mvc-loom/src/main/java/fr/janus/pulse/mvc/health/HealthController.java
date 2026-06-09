@@ -19,6 +19,6 @@ public class HealthController {
 
     @GetMapping("/aggregate")
     public AggregateHealth aggregate() {
-        // TODO : retourner l'agrégat de santé (aggregator.aggregate()).
+        return aggregator.aggregate();
     }
 }

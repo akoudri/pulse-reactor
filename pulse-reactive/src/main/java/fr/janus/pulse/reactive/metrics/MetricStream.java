@@ -20,11 +20,11 @@ public class MetricStream {
 
     /** Flux à exposer aux abonnés (contrôleur SSE). */
     public Flux<MetricSample> stream() {
-        // TODO : exposer le sink sous forme de Flux.
+        return sink.asFlux();
     }
 
     /** Pousse un échantillon dans le flux. Retourne le résultat d'émission du sink. */
     public Sinks.EmitResult emit(MetricSample sample) {
-        // TODO : émettre l'échantillon dans le sink.
+        return sink.tryEmitNext(sample);
     }
 }

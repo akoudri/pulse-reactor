@@ -32,17 +32,19 @@ public class AlertController {
 
     @GetMapping
     public Flux<Alert> list() {
-        // TODO : retourner la liste des alertes (service.all()).
+        return service.all();
     }
 
     @GetMapping("/{id}")
     public Mono<ResponseEntity<Alert>> byId(@PathVariable String id) {
-        // TODO : retourner 200 + alerte, ou 404 si inconnue.
+        return service.byId(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Alert> create(@Valid @RequestBody AlertRule rule) {
-        // TODO : créer l'alerte (service.create()).
+        return service.create(rule);
     }
 }

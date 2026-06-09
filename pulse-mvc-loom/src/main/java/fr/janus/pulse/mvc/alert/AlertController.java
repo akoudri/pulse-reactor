@@ -34,22 +34,24 @@ public class AlertController {
 
     @GetMapping
     public List<Alert> list() {
-        // TODO : retourner la liste des alertes (service.all()).
+        return service.all();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Alert> byId(@PathVariable String id) {
-        // TODO : retourner 200 + alerte, ou 404 si inconnue.
+        return service.byId(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Alert create(@Valid @RequestBody AlertRule rule) {
-        // TODO : créer l'alerte (service.create()).
+        return service.create(rule);
     }
 
     @GetMapping("/count")
     public Map<String, Long> count() {
-        // TODO : retourner le compteur d'alertes (même contrat que la route /count réactive).
+        return Map.of("count", service.count());
     }
 }

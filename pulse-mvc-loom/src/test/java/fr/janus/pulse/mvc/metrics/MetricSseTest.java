@@ -35,7 +35,30 @@ class MetricSseTest {
     @Timeout(15)
     @DisplayName("le stream SSE délivre les échantillons du simulateur")
     void emitsSseEvents() throws Exception {
-        // TODO : lire /api/metrics/stream avec un vrai client HTTP et vérifier qu'on reçoit
-        //        au moins un événement SSE (text/event-stream) du simulateur.
+        HttpClient http = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/metrics/stream"))
+                .header("Accept", "text/event-stream")
+                .GET()
+                .build();
+
+        HttpResponse<InputStream> response = http.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.headers().firstValue("Content-Type").orElse("").contains("text/event-stream"),
+                "le content-type doit être text/event-stream");
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(response.body(), StandardCharsets.UTF_8))) {
+            long deadline = System.nanoTime() + Duration.ofSeconds(8).toNanos();
+            boolean sawData = false;
+            String line;
+            while (System.nanoTime() < deadline && (line = reader.readLine()) != null) {
+                if (line.startsWith("data:") && line.contains("agent-sim")) {
+                    sawData = true;
+                    break;
+                }
+            }
+            assertTrue(sawData, "doit recevoir au moins un événement SSE du simulateur");
+        }
     }
 }

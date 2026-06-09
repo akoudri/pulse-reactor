@@ -40,16 +40,27 @@ public class MetricSimulator {
 
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
-        // TODO : si activé, pousser périodiquement des échantillons synthétiques dans le sink
-        //        (conserver le Disposable pour l'arrêter au shutdown).
+        if (!enabled) {
+            return;
+        }
+        // Driver d'une source hot : on souscrit un interval pour pousser dans le sink.
+        // Ce n'est pas un subscribe « sauvage » de contrôleur — c'est le générateur
+        // d'événements, dont on conserve le Disposable pour l'arrêter au shutdown.
+        this.driver = Flux.interval(PERIOD)
+                .map(this::syntheticSample)
+                .subscribe(stream::emit);
     }
 
     @PreDestroy
     public void stop() {
-        // TODO : arrêter le driver d'émission.
+        if (driver != null) {
+            driver.dispose();
+        }
     }
 
     private MetricSample syntheticSample(long tick) {
-        // TODO : produire un échantillon synthétique.
+        long n = sequence.incrementAndGet();
+        double value = n % 100;
+        return new MetricSample("agent-sim", "pulse.cpu.load", value, Instant.now());
     }
 }

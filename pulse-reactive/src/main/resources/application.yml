@@ -2,9 +2,18 @@ spring:
   application:
     name: pulse-reactive
 
-# TODO (Partie A) : configurer le port HTTP (8080).
-#
-# TODO (Partie B) : configurer les upstreams interrogés par le fan-out
-#   /api/health/aggregate :
-#   pulse.upstream.base-url  -> upstream-sim (port 8089)
-#   pulse.upstream.endpoints -> liste { name, path } : fast / slow / unstable
+server:
+  port: 8080
+
+# Upstreams interrogés par le fan-out /api/health/aggregate.
+# base-url = upstream-sim (docker compose --profile upstream, port 8089).
+pulse:
+  upstream:
+    base-url: http://localhost:8089
+    endpoints:
+      - name: fast
+        path: /health/fast
+      - name: slow
+        path: /health/slow
+      - name: unstable
+        path: /health/unstable

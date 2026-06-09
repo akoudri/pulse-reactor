@@ -39,23 +39,62 @@ public class HealthAggregator {
     private final List<PulseUpstreamProperties.Endpoint> endpoints;
 
     public HealthAggregator(PulseUpstreamProperties properties) {
-        // TODO : construire le RestClient (baseUrl + timeout de lecture) et récupérer les endpoints.
+        JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory();
+        factory.setReadTimeout(READ_TIMEOUT); // timeout par appel
+        this.client = RestClient.builder()
+                .baseUrl(properties.baseUrl())
+                .requestFactory(factory)
+                .build();
+        this.endpoints = properties.endpoints();
     }
 
     public AggregateHealth aggregate() {
-        // TODO : interroger les upstreams en parallèle (CompletableFuture sur executor virtuel
-        //        OU séquentiel — à documenter), collecter et agréger en AggregateHealth.
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            List<CompletableFuture<UpstreamHealth>> futures = endpoints.stream()
+                    .map(endpoint -> CompletableFuture.supplyAsync(() -> probe(endpoint), executor))
+                    .toList();
+            List<UpstreamHealth> results = futures.stream()
+                    .map(CompletableFuture::join)
+                    .toList();
+            return combine(results);
+        }
     }
 
     private UpstreamHealth probe(PulseUpstreamProperties.Endpoint endpoint) {
-        // TODO : appel bloquant avec retry + repli DOWN en cas d'échec persistant.
+        long start = System.nanoTime();
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                client.get().uri(endpoint.path()).retrieve().toBodilessEntity();
+                long elapsedMs = (System.nanoTime() - start) / 1_000_000;
+                return new UpstreamHealth(endpoint.name(), HealthStatus.UP, elapsedMs);
+            } catch (RuntimeException ex) {
+                // 5xx, timeout de lecture, connexion : on retente, puis on se replie.
+                if (attempt == MAX_ATTEMPTS) {
+                    return new UpstreamHealth(endpoint.name(), HealthStatus.DOWN, -1L);
+                }
+                sleepBackoff(attempt);
+            }
+        }
+        return new UpstreamHealth(endpoint.name(), HealthStatus.DOWN, -1L); // inatteignable
     }
 
     private static void sleepBackoff(int attempt) {
-        // TODO : attente entre deux tentatives (backoff).
+        try {
+            Thread.sleep(100L * attempt); // sur virtual thread : pas de thread plateforme gelé
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private static AggregateHealth combine(List<UpstreamHealth> results) {
-        // TODO : dériver l'état global (UP / DEGRADED / DOWN) à partir des upstreams.
+        List<UpstreamHealth> sorted = results.stream()
+                .sorted(Comparator.comparing(UpstreamHealth::name))
+                .toList();
+        boolean allDown = sorted.stream().allMatch(u -> u.status() == HealthStatus.DOWN);
+        boolean anyDown = sorted.stream().anyMatch(u -> u.status() == HealthStatus.DOWN);
+        HealthStatus overall = allDown ? HealthStatus.DOWN
+                : anyDown ? HealthStatus.DEGRADED
+                : HealthStatus.UP;
+        return new AggregateHealth(overall, sorted);
     }
 }

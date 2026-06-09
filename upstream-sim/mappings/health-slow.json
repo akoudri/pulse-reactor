@@ -4,5 +4,9 @@
     "url": "/health/slow"
   },
   "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "status": "UP" },
+    "fixedDelayMilliseconds": 700
   }
 }

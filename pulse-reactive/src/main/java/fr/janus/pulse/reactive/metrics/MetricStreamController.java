@@ -26,6 +26,10 @@ public class MetricStreamController {
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<MetricSample>> stream() {
-        // TODO : mapper le flux de métriques en Flux<ServerSentEvent<MetricSample>>.
+        return metricStream.stream()
+                .map(sample -> ServerSentEvent.<MetricSample>builder()
+                        .event("metric")
+                        .data(sample)
+                        .build());
     }
 }

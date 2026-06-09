@@ -23,18 +23,24 @@ public class AlertService {
     private final Map<String, Alert> store = new ConcurrentHashMap<>();
 
     public Flux<Alert> all() {
-        // TODO : retourner toutes les alertes du store sous forme de Flux.
+        return Flux.fromIterable(store.values());
     }
 
     public Mono<Alert> byId(String id) {
-        // TODO : retourner l'alerte correspondant à l'id (Mono vide si absente).
+        return Mono.justOrEmpty(store.get(id));
     }
 
     public Mono<Alert> create(AlertRule rule) {
-        // TODO : créer une alerte à partir de la règle et la stocker, sans block().
+        // fromSupplier : la génération d'id et l'écriture ne s'exécutent qu'à la souscription.
+        return Mono.fromSupplier(() -> {
+            String id = UUID.randomUUID().toString();
+            Alert alert = Alert.from(id, rule, Instant.now());
+            store.put(id, alert);
+            return alert;
+        });
     }
 
     public Mono<Long> count() {
-        // TODO : retourner le nombre d'alertes du store.
+        return Mono.fromSupplier(() -> (long) store.size());
     }
 }

@@ -23,18 +23,21 @@ public class AlertService {
     private final Map<String, Alert> store = new ConcurrentHashMap<>();
 
     public List<Alert> all() {
-        // TODO : retourner toutes les alertes du store.
+        return List.copyOf(store.values());
     }
 
     public Optional<Alert> byId(String id) {
-        // TODO : retourner l'alerte correspondant à l'id (Optional vide si absente).
+        return Optional.ofNullable(store.get(id));
     }
 
     public Alert create(AlertRule rule) {
-        // TODO : créer une alerte à partir de la règle et la stocker.
+        String id = UUID.randomUUID().toString();
+        Alert alert = Alert.from(id, rule, Instant.now());
+        store.put(id, alert);
+        return alert;
     }
 
     public long count() {
-        // TODO : retourner le nombre d'alertes du store.
+        return store.size();
     }
 }

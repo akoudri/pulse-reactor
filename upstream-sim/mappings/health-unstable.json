@@ -1,8 +1,22 @@
 {
-  "request": {
-    "method": "GET",
-    "url": "/health/unstable"
-  },
-  "response": {
-  }
+  "mappings": [
+    {
+      "scenarioName": "unstable",
+      "requiredScenarioState": "Started",
+      "newScenarioState": "recovered",
+      "request": { "method": "GET", "url": "/health/unstable" },
+      "response": { "status": 503 }
+    },
+    {
+      "scenarioName": "unstable",
+      "requiredScenarioState": "recovered",
+      "newScenarioState": "Started",
+      "request": { "method": "GET", "url": "/health/unstable" },
+      "response": {
+        "status": 200,
+        "headers": { "Content-Type": "application/json" },
+        "jsonBody": { "status": "UP" }
+      }
+    }
+  ]
 }

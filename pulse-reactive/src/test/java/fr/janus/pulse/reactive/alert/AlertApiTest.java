@@ -42,24 +42,69 @@ class AlertApiTest {
     @Test
     @DisplayName("POST crée une alerte (201), GET /{id} la retrouve, GET liste la contient")
     void createThenFetch() {
-        // TODO : POST crée une alerte (201), GET /{id} la retrouve, GET liste la contient.
+        AlertRule rule = new AlertRule("pulse.cpu.load", 90.0, Severity.CRITICAL);
+
+        Alert created = client.post().uri("/api/alerts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(rule)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Alert.class)
+                .returnResult()
+                .getResponseBody();
+
+        assertNotNull(created, "le POST doit renvoyer l'alerte créée");
+
+        client.get().uri("/api/alerts/{id}", created.id())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.metricName").isEqualTo("pulse.cpu.load")
+                .jsonPath("$.severity").isEqualTo("CRITICAL");
+
+        client.get().uri("/api/alerts")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(Alert.class)
+                .value(list -> assertTrue(
+                        list.stream().anyMatch(a -> a.id().equals(created.id())),
+                        "l'alerte créée doit figurer dans la liste"));
     }
 
     @Test
     @DisplayName("GET /{id} inconnu → 404")
     void unknownIdReturns404() {
-        // TODO : GET /{id} inconnu → 404.
+        client.get().uri("/api/alerts/{id}", "does-not-exist")
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
     @DisplayName("POST avec metricName vide → 400 (validation)")
     void invalidRuleReturns400() {
-        // TODO : POST avec metricName vide → 400 (validation).
+        AlertRule invalid = new AlertRule("", 1.0, Severity.INFO);
+
+        client.post().uri("/api/alerts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalid)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
     @DisplayName("GET /api/alerts/count (route fonctionnelle) → 200 avec un compteur")
     void functionalCountRoute() {
-        // TODO : GET /api/alerts/count (route fonctionnelle) → 200 avec un compteur.
+        // On crée une alerte pour garantir count >= 1, sans dépendre de l'état global.
+        client.post().uri("/api/alerts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new AlertRule("pulse.mem.used", 80.0, Severity.WARNING))
+                .exchange()
+                .expectStatus().isCreated();
+
+        client.get().uri("/api/alerts/count")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.count").isNumber();
     }
 }

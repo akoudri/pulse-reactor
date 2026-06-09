@@ -21,12 +21,41 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- TODO : ajouter les dépendances du module réactif (cf. lab Parties A à C) :
-               - serveur réactif WebFlux + Reactor ;
-               - WebClient (fan-out de la Partie B) ;
-               - Bean Validation (@Valid @RequestBody) ;
-               - dépendances de test : starter-test, reactor-test, et un stub d'upstreams
-                 (WireMock) pour le test du fan-out. -->
+        <!-- WebFlux : serveur réactif (Netty) + Reactor. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <!-- WebClient : en Boot 4 l'auto-config (WebClient.Builder prototype) est dans ce
+             module dédié, non transitif depuis starter-webflux. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webclient</artifactId>
+        </dependency>
+        <!-- Bean Validation pour @Valid @RequestBody (apporte Hibernate Validator). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- WireMock pour stubber les upstreams du fan-out (hors BOM → version pinnée).
+             Variante "standalone" : Jetty/Jackson shadés, évite les conflits avec Netty. -->
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>3.13.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,10 +1,21 @@
 spring:
   application:
     name: pulse-mvc-loom
+  threads:
+    virtual:
+      enabled: true   # thread-per-request servlet sur virtual threads (Loom)
 
-# TODO (Partie D) : activer les virtual threads (spring.threads.virtual.enabled).
-#
-# TODO (Partie D) : configurer le port HTTP (8081).
-#
-# TODO (Partie D) : configurer les mêmes upstreams que le jumeau réactif
-#   (pulse.upstream.base-url + endpoints) — contrat identique pour le différentiel.
+server:
+  port: 8081
+
+# Mêmes upstreams que le jumeau réactif (contrat identique pour le différentiel).
+pulse:
+  upstream:
+    base-url: http://localhost:8089
+    endpoints:
+      - name: fast
+        path: /health/fast
+      - name: slow
+        path: /health/slow
+      - name: unstable
+        path: /health/unstable

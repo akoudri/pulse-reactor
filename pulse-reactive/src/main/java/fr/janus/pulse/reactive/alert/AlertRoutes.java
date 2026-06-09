@@ -19,7 +19,8 @@ public class AlertRoutes {
 
     @Bean
     public RouterFunction<ServerResponse> alertCountRoute(AlertService service) {
-        // TODO : exposer GET /api/alerts/count en style fonctionnel (RouterFunction),
-        //        retourner le compteur (service.count()) dans la réponse.
+        return route(GET("/api/alerts/count"),
+                request -> service.count()
+                        .flatMap(count -> ServerResponse.ok().bodyValue(Map.of("count", count))));
     }
 }

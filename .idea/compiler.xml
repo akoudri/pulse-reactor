@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="reactor-demo" />
         <module name="pulse-reactive" />
         <module name="pulse-common" />
         <module name="pulse-loadtest" />
@@ -23,6 +24,7 @@
       <module name="pulse-mvc-loom" options="-parameters" />
       <module name="pulse-reactive" options="-parameters" />
       <module name="pulse-reactor-katas" options="-parameters" />
+      <module name="reactor-demo" options="-parameters" />
     </option>
   </component>
 </project>

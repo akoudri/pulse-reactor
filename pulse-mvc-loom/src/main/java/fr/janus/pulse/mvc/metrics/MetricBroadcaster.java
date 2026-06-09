@@ -21,11 +21,22 @@ public class MetricBroadcaster {
 
     /** Enregistre un nouvel abonné SSE (sans timeout serveur). */
     public SseEmitter subscribe() {
-        // TODO : créer un SseEmitter, le désinscrire à la complétion/timeout/erreur, l'enregistrer.
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        emitter.onCompletion(() -> emitters.remove(emitter));
+        emitter.onTimeout(() -> emitters.remove(emitter));
+        emitter.onError(e -> emitters.remove(emitter));
+        emitters.add(emitter);
+        return emitter;
     }
 
     /** Pousse un échantillon à tous les abonnés ; retire ceux dont l'envoi échoue. */
     public void broadcast(MetricSample sample) {
-        // TODO : envoyer l'échantillon à chaque abonné, retirer ceux dont l'envoi échoue.
+        for (SseEmitter emitter : emitters) {
+            try {
+                emitter.send(SseEmitter.event().name("metric").data(sample));
+            } catch (IOException | RuntimeException ex) {
+                emitter.completeWithError(ex);
+            }
+        }
     }
 }

@@ -43,7 +43,18 @@ class MetricStreamTest {
     @Test
     @DisplayName("le stream émet du text/event-stream et délivre les échantillons du simulateur")
     void streamsSimulatedSamples() {
-        // TODO : consommer /api/metrics/stream (text/event-stream), décoder en MetricSample
-        //        et vérifier les échantillons du simulateur via StepVerifier.
+        Flux<MetricSample> body = client.get().uri("/api/metrics/stream")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .returnResult(MetricSample.class)
+                .getResponseBody();
+
+        StepVerifier.create(body)
+                .assertNext(sample -> assertEquals("agent-sim", sample.agentId()))
+                .assertNext(sample -> assertEquals("pulse.cpu.load", sample.name()))
+                .thenCancel()
+                .verify(Duration.ofSeconds(6));
     }
 }

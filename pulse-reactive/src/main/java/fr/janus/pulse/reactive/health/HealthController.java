@@ -20,6 +20,6 @@ public class HealthController {
 
     @GetMapping("/aggregate")
     public Mono<AggregateHealth> aggregate() {
-        // TODO : retourner l'agrégat de santé (aggregator.aggregate()).
+        return aggregator.aggregate();
     }
 }

@@ -32,15 +32,28 @@ public class MetricSimulator {
 
     @EventListener(ApplicationReadyEvent.class)
     public void start() {
-        // TODO : si activé, démarrer une boucle d'émission sur un virtual thread dédié.
+        if (!enabled) {
+            return;
+        }
+        // Virtual thread dédié : bloquer (Thread.sleep) n'immobilise pas un thread plateforme.
+        Thread.ofVirtual().name("metric-sim").start(this::loop);
     }
 
     private void loop() {
-        // TODO : pousser périodiquement un échantillon synthétique au broadcaster.
+        long n = 0;
+        while (running) {
+            broadcaster.broadcast(new MetricSample("agent-sim", "pulse.cpu.load", n++ % 100, Instant.now()));
+            try {
+                Thread.sleep(PERIOD_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
     }
 
     @PreDestroy
     public void stop() {
-        // TODO : arrêter la boucle d'émission.
+        running = false;
     }
 }

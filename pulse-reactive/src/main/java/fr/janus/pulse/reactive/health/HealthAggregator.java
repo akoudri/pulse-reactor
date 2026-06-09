@@ -31,19 +31,41 @@ public class HealthAggregator {
     private final List<PulseUpstreamProperties.Endpoint> endpoints;
 
     public HealthAggregator(WebClient.Builder builder, PulseUpstreamProperties properties) {
-        // TODO : construire le WebClient (baseUrl = upstream-sim) et récupérer les endpoints.
+        this.client = builder.baseUrl(properties.baseUrl()).build();
+        this.endpoints = properties.endpoints();
     }
 
     public Mono<AggregateHealth> aggregate() {
-        // TODO : interroger les upstreams en parallèle (fan-out à concurrence bornée),
-        //        collecter les résultats et les agréger en AggregateHealth.
+        // flatMap : l'ordre des réponses n'importe pas, on veut le parallélisme.
+        // concatMap sérialiserait les appels (latence cumulée). Concurrence bornée explicite.
+        return Flux.fromIterable(endpoints)
+                .flatMap(this::probe, UPSTREAM_CONCURRENCY)
+                .collectList()
+                .map(HealthAggregator::combine);
     }
 
     private Mono<UpstreamHealth> probe(PulseUpstreamProperties.Endpoint endpoint) {
-        // TODO : appeler l'upstream avec timeout + retry + repli (onErrorReturn DOWN).
+        return client.get().uri(endpoint.path())
+                .retrieve()
+                .toBodilessEntity()
+                .timeout(PER_CALL_TIMEOUT)
+                .retryWhen(Retry.backoff(2, Duration.ofMillis(100)))
+                .elapsed() // (latenceMs, réponse)
+                .map(timed -> new UpstreamHealth(endpoint.name(), HealthStatus.UP, timed.getT1()))
+                // Repli : un upstream KO (timeout / 5xx après retries) ne casse pas l'agrégat.
+                .onErrorReturn(new UpstreamHealth(endpoint.name(), HealthStatus.DOWN, -1L));
     }
 
     private static AggregateHealth combine(List<UpstreamHealth> results) {
-        // TODO : dériver l'état global (UP / DEGRADED / DOWN) à partir des upstreams.
+        // Tri par nom : sortie déterministe (utile aux tests et à la lecture).
+        List<UpstreamHealth> sorted = results.stream()
+                .sorted(Comparator.comparing(UpstreamHealth::name))
+                .toList();
+        boolean allDown = sorted.stream().allMatch(u -> u.status() == HealthStatus.DOWN);
+        boolean anyDown = sorted.stream().anyMatch(u -> u.status() == HealthStatus.DOWN);
+        HealthStatus overall = allDown ? HealthStatus.DOWN
+                : anyDown ? HealthStatus.DEGRADED
+                : HealthStatus.UP;
+        return new AggregateHealth(overall, sorted);
     }
 }

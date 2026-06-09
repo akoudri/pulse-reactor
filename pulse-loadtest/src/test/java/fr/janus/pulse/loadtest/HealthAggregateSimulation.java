@@ -34,11 +34,28 @@ public class HealthAggregateSimulation extends Simulation {
     private static final String BASE_URL = System.getProperty("pulse.baseUrl", "http://localhost:8080");
 
     public HealthAggregateSimulation() {
-        // TODO (Partie E) : définir la simulation Gatling.
-        //  - protocole HTTP : baseUrl = BASE_URL (paramétrable -Dpulse.baseUrl) ;
-        //  - scénario : GET /api/health/aggregate (le cas fan-out, le plus discriminant) ;
-        //  - injection : montée en charge (rampUsersPerSec) puis plateau ;
-        //  - mesures : débit et p99 sous charge (assertions = garde-fous, pas des SLO).
-        //  Lancer contre 8080 (réactif) puis 8081 (jumeau) — cf. README.md.
+        HttpProtocolBuilder httpProtocol = http
+                .baseUrl(BASE_URL)
+                .acceptHeader("application/json");
+
+        ScenarioBuilder scenario = scenario("Fan-out /api/health/aggregate")
+                .exec(http("GET aggregate")
+                        .get("/api/health/aggregate")
+                        .check(status().is(200)));
+
+        setUp(
+                scenario.injectOpen(
+                        // Montée progressive puis plateau, pour observer le comportement
+                        // sous charge soutenue (rampe 1→50 req/s sur 30s, puis 50 req/s 30s).
+                        rampUsersPerSec(1).to(50).during(Duration.ofSeconds(30)),
+                        constantUsersPerSec(50).during(Duration.ofSeconds(30))
+                )
+        ).protocols(httpProtocol)
+                .assertions(
+                        // percentile4 = p99 (défaut Gatling). Garde-fous larges, pas des SLO :
+                        // l'intérêt est la COMPARAISON des deux rapports, pas un seuil absolu.
+                        global().responseTime().percentile4().lt(2000),
+                        global().successfulRequests().percent().gt(95.0)
+                );
     }
 }

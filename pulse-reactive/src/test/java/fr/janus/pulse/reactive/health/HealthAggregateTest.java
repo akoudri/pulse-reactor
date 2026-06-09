@@ -59,13 +59,39 @@ class HealthAggregateTest {
     @Test
     @DisplayName("survit au lent (700ms<800ms) et à l'instable (503 puis 200 via retry) → overall UP")
     void aggregateHealthyDespiteSlowAndFlaky() {
-        // TODO : stubber les 3 upstreams (rapide, lent ~700ms, instable 503 puis 200)
-        //        et vérifier que l'agrégat survit (overall UP, 3 upstreams).
+        wireMock.stubFor(get("/health/fast").willReturn(okJson("{\"status\":\"UP\"}")));
+        wireMock.stubFor(get("/health/slow").willReturn(okJson("{\"status\":\"UP\"}").withFixedDelay(700)));
+        // Instable : 503 d'abord, puis 200 — le retryWhen doit récupérer.
+        wireMock.stubFor(get("/health/unstable").inScenario("flaky")
+                .whenScenarioStateIs(STARTED)
+                .willReturn(serviceUnavailable())
+                .willSetStateTo("recovered"));
+        wireMock.stubFor(get("/health/unstable").inScenario("flaky")
+                .whenScenarioStateIs("recovered")
+                .willReturn(okJson("{\"status\":\"UP\"}")));
+
+        client.get().uri("/api/health/aggregate")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.overall").isEqualTo("UP")
+                .jsonPath("$.upstreams.length()").isEqualTo(3);
     }
 
     @Test
     @DisplayName("instable durablement KO → repli DOWN, overall DEGRADED")
     void aggregateDegradedWhenOneStaysDown() {
-        // TODO : un upstream durablement KO → repli DOWN, overall DEGRADED.
+        wireMock.stubFor(get("/health/fast").willReturn(okJson("{\"status\":\"UP\"}")));
+        wireMock.stubFor(get("/health/slow").willReturn(okJson("{\"status\":\"UP\"}")));
+        wireMock.stubFor(get("/health/unstable").willReturn(serviceUnavailable())); // toujours 503
+
+        client.get().uri("/api/health/aggregate")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.overall").isEqualTo("DEGRADED")
+                // combine() trie par nom : [fast, slow, unstable] → unstable en index 2.
+                .jsonPath("$.upstreams[2].name").isEqualTo("unstable")
+                .jsonPath("$.upstreams[2].status").isEqualTo("DOWN");
     }
 }

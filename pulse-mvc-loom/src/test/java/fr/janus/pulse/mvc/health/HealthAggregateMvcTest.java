@@ -61,13 +61,34 @@ class HealthAggregateMvcTest {
     @Test
     @DisplayName("survit au lent (700ms<800ms) et à l'instable (503 puis 200 via retry) → overall UP")
     void aggregateHealthyDespiteSlowAndFlaky() throws Exception {
-        // TODO : stubber les 3 upstreams (rapide, lent ~700ms, instable 503 puis 200)
-        //        et vérifier que l'agrégat survit (overall UP, 3 upstreams).
+        wireMock.stubFor(WireMock.get("/health/fast").willReturn(WireMock.okJson("{\"status\":\"UP\"}")));
+        wireMock.stubFor(WireMock.get("/health/slow").willReturn(WireMock.okJson("{\"status\":\"UP\"}").withFixedDelay(700)));
+        wireMock.stubFor(WireMock.get("/health/unstable").inScenario("flaky")
+                .whenScenarioStateIs(STARTED)
+                .willReturn(WireMock.serviceUnavailable())
+                .willSetStateTo("recovered"));
+        wireMock.stubFor(WireMock.get("/health/unstable").inScenario("flaky")
+                .whenScenarioStateIs("recovered")
+                .willReturn(WireMock.okJson("{\"status\":\"UP\"}")));
+
+        mvc.perform(get("/api/health/aggregate"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.overall", is("UP")))
+                .andExpect(jsonPath("$.upstreams.length()", is(3)));
     }
 
     @Test
     @DisplayName("instable durablement KO → repli DOWN, overall DEGRADED")
     void aggregateDegradedWhenOneStaysDown() throws Exception {
-        // TODO : un upstream durablement KO → repli DOWN, overall DEGRADED.
+        wireMock.stubFor(WireMock.get("/health/fast").willReturn(WireMock.okJson("{\"status\":\"UP\"}")));
+        wireMock.stubFor(WireMock.get("/health/slow").willReturn(WireMock.okJson("{\"status\":\"UP\"}")));
+        wireMock.stubFor(WireMock.get("/health/unstable").willReturn(WireMock.serviceUnavailable()));
+
+        mvc.perform(get("/api/health/aggregate"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.overall", is("DEGRADED")))
+                // combine() trie par nom : [fast, slow, unstable] → unstable en index 2.
+                .andExpect(jsonPath("$.upstreams[2].name", is("unstable")))
+                .andExpect(jsonPath("$.upstreams[2].status", is("DOWN")));
     }
 }

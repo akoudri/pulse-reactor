@@ -2,13 +2,13 @@ package com.akfc.training.reactive;
 
 import reactor.core.publisher.Mono;
 
-record PipelineState(String res1, String res2, String res3) {
-    // Petit builder pratique pour faire évoluer l'état de manière immuable
-    PipelineState withRes2(String r2) { return new PipelineState(res1, r2, res3); }
-    PipelineState withRes3(String r3) { return new PipelineState(res1, res2, r3); }
-}
-
 public class CompoExample {
+
+    record PipelineState(String res1, String res2, String res3) {
+        // Petit builder pratique pour faire évoluer l'état de manière immuable
+        PipelineState withRes2(String r2) { return new PipelineState(res1, r2, res3); }
+        PipelineState withRes3(String r3) { return new PipelineState(res1, res2, r3); }
+    }
 
     public static void main(String[] args) {
         // Le pipeline d'exécution. L'état (PipelineState) est initialisé dès
