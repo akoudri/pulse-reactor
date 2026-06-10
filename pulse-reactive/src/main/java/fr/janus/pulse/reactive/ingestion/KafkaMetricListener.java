@@ -1,7 +1,6 @@
 package fr.janus.pulse.reactive.ingestion;
 
 import java.time.Duration;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import fr.janus.pulse.common.MetricSample;
 import fr.janus.pulse.reactive.context.TraceIdThreadLocalAccessor;
+import fr.janus.pulse.reactive.context.TraceIds;
 import fr.janus.pulse.reactive.metrics.MetricStream;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -73,8 +73,9 @@ public class KafkaMetricListener {
     public void onMessage(String json, Acknowledgment ack) {
         MetricSample sample = codec.fromJson(json);
         // traceId de corrélation pour CE message (en prod : lu d'un en-tête Kafka stampé par
-        // l'agent). On l'écrit dans le Context : il suivra le saut de thread ci-dessous.
-        String traceId = UUID.randomUUID().toString();
+        // l'agent). On l'écrit dans le Context : il suivra le saut de thread ci-dessous. Généré
+        // via TraceIds (ThreadLocalRandom, non bloquant) — pas de SecureRandom sur le pipeline.
+        String traceId = TraceIds.newTraceId();
 
         // Driver d'ingestion réactif (pas un subscribe « sauvage » de contrôleur) : il traverse
         // une frontière de thread pour matérialiser la propagation du traceId (lab D).

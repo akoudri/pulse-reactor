@@ -1,43 +1,31 @@
 package fr.janus.pulse.reactive;
 
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
 
 /**
- * Socle des tests d'intégration : une base PostgreSQL <strong>éphémère</strong> fournie par
- * Testcontainers, partagée entre les classes de test via le <em>singleton container pattern</em>
- * (démarrée une fois par JVM, nettoyée par Ryuk en fin de run). Aucune base partagée externe.
+ * Socle des tests d'intégration : il importe {@link PulseTestContainers}, qui fournit un
+ * PostgreSQL et un Kafka <strong>éphémères</strong> (Testcontainers) câblés à Boot via
+ * {@code @ServiceConnection} (lab J4-1 C). Plus aucun {@code @DynamicPropertySource} pour les
+ * propriétés de connexion : Boot dérive {@code spring.r2dbc.*} et
+ * {@code spring.kafka.bootstrap-servers} des conteneurs.
  *
- * <p>On câble la connexion R2DBC via {@link DynamicPropertySource} (et non {@code @ServiceConnection})
- * pour rester maître de l'URL {@code r2dbc:postgresql://...} et garder un socle réutilisable par
- * héritage, quelles que soient les options {@code @SpringBootTest} de chaque sous-classe.
- * {@code spring.sql.init.mode=always} (application.yml) rejoue {@code schema.sql} sur cette base neuve.
+ * <p>{@code spring.sql.init.mode=always} (application.yml) rejoue {@code schema.sql} sur la base
+ * neuve. Tous les {@code @SpringBootTest} héritent de ce socle : l'{@code @Import} et le
+ * {@code @TestPropertySource} sont repris via la hiérarchie de classes de test.
+ *
+ * <p>Seules propriétés <em>métier</em> conservées ici : on éteint les <strong>deux</strong>
+ * simulateurs d'agents par défaut, sinon ils publieraient en continu pendant les tests —
+ * {@code AgentSimulator} (producteur Kafka, {@code pulse.ingestion.simulator.enabled}) et
+ * {@code MetricSimulator} (push direct dans le {@code MetricStream}, {@code pulse.simulator.enabled}).
+ * Ce dernier court-circuite Kafka : laissé actif, ses échantillons « agent-sim » polluent le flux
+ * chaud partagé et devancent ceux produits par les tests. Les tests qui ont besoin du
+ * {@code @KafkaListener} réactivent {@code spring.kafka.listener.auto-startup} localement.
  */
+@Import(PulseTestContainers.class)
+@TestPropertySource(properties = {
+        "pulse.ingestion.simulator.enabled=false",
+        "pulse.simulator.enabled=false"
+})
 public abstract class AbstractPostgresIntegrationTest {
-
-    static final PostgreSQLContainer<?> POSTGRES =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:17"));
-
-    static {
-        POSTGRES.start();
-    }
-
-    @DynamicPropertySource
-    static void r2dbcProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.r2dbc.url", () -> "r2dbc:postgresql://%s:%d/%s".formatted(
-                POSTGRES.getHost(), POSTGRES.getFirstMappedPort(), POSTGRES.getDatabaseName()));
-        registry.add("spring.r2dbc.username", POSTGRES::getUsername);
-        registry.add("spring.r2dbc.password", POSTGRES::getPassword);
-        // Le simulateur d'agents (producteur Kafka) reste éteint par défaut en test : sans
-        // broker, ses publications bloqueraient. Le test d'ingestion Kafka, qui démarre un
-        // broker Testcontainers, produit explicitement via KafkaTemplate.
-        registry.add("pulse.ingestion.simulator.enabled", () -> "false");
-        // Le simulateur de métriques (MetricSimulator) pousse aussi des échantillons « agent-sim »
-        // directement dans le MetricStream (hors Kafka). Éteint en test : les tests pilotent
-        // eux-mêmes les émissions du pont (sinon ses échantillons polluent le flux chaud partagé,
-        // p. ex. en devançant le message produit par KafkaIngestionTest).
-        registry.add("pulse.simulator.enabled", () -> "false");
-    }
 }

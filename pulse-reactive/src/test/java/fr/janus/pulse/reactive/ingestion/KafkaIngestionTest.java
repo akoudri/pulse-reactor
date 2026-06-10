@@ -3,8 +3,6 @@ package fr.janus.pulse.reactive.ingestion;
 import java.time.Duration;
 import java.time.Instant;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +12,7 @@ import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.kafka.ConfluentKafkaContainer;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.test.context.TestPropertySource;
 
 import org.slf4j.LoggerFactory;
 
@@ -38,33 +33,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * sur le topic {@code metrics} traverse le pont {@code @KafkaListener → Sinks → Flux} puis le
  * pipeline {@code normalize/enrich}, et ressort enrichi sur {@link MetricIngestion#processed()}.
  *
- * <p>Broker éphémère via Testcontainers (KRaft). Aucun {@code reactor-kafka} : Spring Kafka
- * bridgé en {@code Flux}. On attend l'assignation de partition avant de produire
- * ({@code ContainerTestUtils.waitForAssignment}) pour un test déterministe (la source est
- * <em>hot</em> : on souscrit avant d'émettre).
- *
- * <p>Image {@code confluentinc/cp-kafka} : le {@code docker-compose} de dev tourne sur
- * {@code apache/kafka}, mais le {@code KafkaContainer} (image apache) de Testcontainers 2.0.3
- * échoue au format KRaft (« advertised.listeners cannot use 0.0.0.0 »). On utilise donc
- * l'image Confluent, robuste avec {@code ConfluentKafkaContainer} ; le broker testé reste
- * fonctionnellement équivalent.
+ * <p>Broker Kafka éphémère fourni par le socle {@link AbstractPostgresIntegrationTest} via
+ * {@code @ServiceConnection} (lab J4-1 C) : plus de container ni de {@code @DynamicPropertySource}
+ * local. On réactive seulement le {@code @KafkaListener} ({@code auto-startup=true}). Aucun
+ * {@code reactor-kafka} : Spring Kafka bridgé en {@code Flux}. On attend l'assignation de partition
+ * avant de produire ({@code ContainerTestUtils.waitForAssignment}) car la source est <em>hot</em>.
  */
 @SpringBootTest
+@TestPropertySource(properties = "spring.kafka.listener.auto-startup=true")
 class KafkaIngestionTest extends AbstractPostgresIntegrationTest {
-
-    static final ConfluentKafkaContainer KAFKA =
-            new ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.2"));
-
-    static {
-        KAFKA.start();
-    }
-
-    @DynamicPropertySource
-    static void kafkaProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.kafka.bootstrap-servers", KAFKA::getBootstrapServers);
-        // Ce test (et lui seul) démarre les @KafkaListener : le broker est disponible.
-        registry.add("spring.kafka.listener.auto-startup", () -> "true");
-    }
 
     // Type brut : le KafkaTemplate auto-configuré est déclaré KafkaTemplate<?, ?>.
     @SuppressWarnings("rawtypes")
@@ -82,11 +59,6 @@ class KafkaIngestionTest extends AbstractPostgresIntegrationTest {
 
     @Value("${pulse.ingestion.topic}")
     private String topic;
-
-    @AfterAll
-    static void stopKafka() {
-        KAFKA.stop();
-    }
 
     @Test
     @DisplayName("Kafka → @KafkaListener → Sinks → pipeline : un message ressort normalisé + enrichi")

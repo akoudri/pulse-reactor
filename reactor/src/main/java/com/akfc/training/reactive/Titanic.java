@@ -2,15 +2,14 @@ package com.akfc.training.reactive;
 
 import reactor.core.publisher.Flux;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Goal: load the /titanic.csv resource (fields separated by ';') into a Flux of Customer
- * and run a few reactive queries on it.
- */
 public class Titanic {
 
     private Flux<Customer> customers;
@@ -20,18 +19,42 @@ public class Titanic {
     }
 
     private Flux<Customer> loadData() {
-        //TODO: read the CSV file reactively, making sure the reader is always closed
-        //step 1: use Flux.using(resourceSupplier, sourceSupplier, resourceCleanup):
-        //        - resource: a BufferedReader on Titanic.class.getResourceAsStream("/titanic.csv")
-        //        - source:   Flux.fromStream(reader.lines())
-        //        - cleanup:  close the reader (beware of the checked IOException)
-        //step 2: map each line to a Customer:
-        //        - parse the line with a Scanner using ";" as delimiter and Locale.US
-        //        - fields, in order: pClass (int), survived (int, 0 = false), name (String),
-        //          sex ("male" -> Sex.MAN, otherwise Sex.WOMAN), age (double)
-        //        - careful: the age may be missing — use hasNextDouble() and default to -1
-        return null;
+        return Flux.using(
+                        () -> new BufferedReader(new InputStreamReader(Titanic.class.getResourceAsStream("/titanic.csv"))),
+                        reader -> Flux.fromStream(reader.lines()),
+                        reader -> {
+                            try {
+                                reader.close();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                )
+                .map(l -> {
+                    Scanner scan = new Scanner(l);
+                    scan.useDelimiter(";");
+                    scan.useLocale(Locale.US);
+                    int pClass = scan.nextInt();
+                    boolean survived = scan.nextInt() != 0;
+                    String name = scan.next();
+                    Sex sex = (scan.next().equalsIgnoreCase("male"))? Sex.MAN: Sex.WOMAN;
+                    double age = -1;
+                    if (scan.hasNextDouble()) {
+                        age = scan.nextDouble();
+                    }
+                    return new Customer(pClass, survived, name, sex, age);
+                });
     }
+
+    /*public void head(int n) {
+        assert n > 0;
+        customers.stream().limit(n).forEach(System.out::println);
+    }
+
+    public void tail(int n) {
+        assert (n > 0 && n < customers.size());
+        customers.stream().skip(customers.size() - n).forEach(System.out::println);
+    }*/
 
     public Flux<Customer> getCustomers() {
         return customers;
@@ -39,13 +62,18 @@ public class Titanic {
 
     public static void main(String[] args) {
         Titanic t = new Titanic();
-        //TODO: query the data
-        //step 1: display the first 5 customers (take)
-        //step 2: compute and display the average age of the men:
-        //        - filter on sex == Sex.MAN and a valid age (> 0)
-        //        - collect the elements, extract the ages and average them
-        //          (hint: collectList then java streams, or look at MathFlux from reactor-extra)
-        //bonus:  compute the average age per sex, and the survival rate per passenger class
+        t.customers.take(5).subscribe(System.out::println);
+        t.customers.filter(e -> e.sex == Sex.MAN && e.age > 0).collectList()
+                .map(l -> l.stream().map(e -> e.age).mapToDouble(e -> e * 1.0).average())
+                .subscribe(System.out::println);
+        /*Titanic t = new Titanic();
+        double avg = t.getCustomers().stream().filter(e -> e.age() >= 0 && e.sex() == Sex.MAN).mapToDouble(Customer::age).average().orElse(0.0);
+        t.getCustomers().stream().limit(5).map(Customer::fullName).forEach(e -> System.out.format("%s\t%s\t%s\n", e[0], e[1], e[2]));
+        System.out.println(avg);
+        t.customers.parallelStream()
+                .filter(e -> e.age() >= 0)
+                .collect(Collectors.groupingByConcurrent(Customer::sex, Collectors.averagingDouble(Customer::age)))
+                .forEach((k, v) -> System.out.println(k + " : " + v));*/
     }
 
     record Customer(int pClass, boolean survived, String name, Sex sex, double age) {

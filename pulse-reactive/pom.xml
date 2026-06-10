@@ -117,12 +117,40 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Slice test WebFlux (lab J4-1 B) : en Boot 4 le slice @WebFluxTest a été sorti de
+             spring-boot-test-autoconfigure vers un module dédié `spring-boot-webflux-test`
+             (package org.springframework.boot.webflux.test.autoconfigure), non transitif via
+             starter-test — même logique de modularisation que spring-boot-webclient. Apporte
+             aussi l'auto-config WebTestClient pour le slice. Version via le BOM. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webflux-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Intégration Testcontainers ↔ Boot (lab J4-1 C) : fournit @ServiceConnection, qui
+             génère les ConnectionDetails (R2DBC, Kafka…) à partir d'un bean container, en
+             remplacement de @DynamicPropertySource. Version via le BOM. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- Testcontainers 2.x (BOM Boot) : PostgreSQL éphémère pour les tests d'intégration
              R2DBC (pas de base partagée). En TC 2.0 les modules sont préfixés
              `testcontainers-*` (jadis `org.testcontainers:postgresql`). -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Pont R2DBC de Testcontainers (classe org.testcontainers.r2dbc.R2DBCDatabaseContainer)
+             requis par la ConnectionDetailsFactory R2DBC de Boot pour dériver les
+             ConnectionFactoryOptions du PostgreSQLContainer via @ServiceConnection (lab J4-1 C).
+             Sans lui : NoClassDefFoundError R2DBCDatabaseContainer au démarrage du contexte.
+             Version gérée par le BOM Testcontainers (importé par le BOM Boot) — pas de pin. -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-r2dbc</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -150,6 +178,19 @@
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- BlockHound (lab J4-1 D) : agent qui instrumente la JVM pour détecter tout appel
+             bloquant exécuté sur un thread « non bloquant » (event-loop Netty, schedulers
+             parallel/single de Reactor). Hors BOM Boot → version pinnée. On prend la dernière
+             (1.0.16) : l'instrumentation est sensible au JDK et on tourne sous JDK 25 ; le
+             byte-buddy sous-jacent est aligné par le BOM (1.17.x, compatible JDK 25). Le module
+             `-junit-platform` auto-installe BlockHound via un LauncherSessionListener (ServiceLoader)
+             pour toute la session de test — pas d'appel BlockHound.install() manuel. -->
+        <dependency>
+            <groupId>io.projectreactor.tools</groupId>
+            <artifactId>blockhound-junit-platform</artifactId>
+            <version>1.0.16.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
         <!-- WireMock pour stubber les upstreams du fan-out (hors BOM → version pinnée).
              Variante "standalone" : Jetty/Jackson shadés, évite les conflits avec Netty. -->
         <dependency>
@@ -165,6 +206,17 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- BlockHound (lab J4-1 D) sous JDK >= 13 : son auto-test d'instrumentation
+                 (redéfinition de Thread.sleep & co.) échoue ("The instrumentation have failed")
+                 sans ce flag. Indispensable sous JDK 25. C'est une option de la JVM de test
+                 (config de plugin), pas un pin de version de dépendance. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-XX:+AllowRedefinitionToAddDeleteMethods</argLine>
+                </configuration>
             </plugin>
         </plugins>
     </build>

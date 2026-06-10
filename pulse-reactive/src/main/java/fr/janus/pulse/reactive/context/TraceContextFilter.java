@@ -1,7 +1,5 @@
 package fr.janus.pulse.reactive.context;
 
-import java.util.UUID;
-
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -34,7 +32,10 @@ public class TraceContextFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String traceId = headerOr(exchange, TRACE_HEADER, () -> UUID.randomUUID().toString());
+        // traceId via ThreadLocalRandom (TraceIds), PAS UUID.randomUUID() : ce filtre s'exécute
+        // sur l'event-loop Netty (thread non bloquant) et SecureRandom y serait un appel bloquant
+        // (lecture /dev/urandom), signalé par BlockHound. Un traceId n'a pas besoin d'être cryptographique.
+        String traceId = headerOr(exchange, TRACE_HEADER, TraceIds::newTraceId);
         String tenant = headerOr(exchange, TENANT_HEADER, () -> "default");
 
         return chain.filter(exchange)

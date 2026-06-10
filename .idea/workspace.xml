@@ -7,13 +7,11 @@
     <list default="true" id="a64751c8-cac3-431c-94a2-2d31424f10c2" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pulse-reactive/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/health/HealthAggregator.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/health/HealthAggregator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/metrics/MetricStream.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/metrics/MetricStream.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/metrics/MetricStreamController.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/metrics/MetricStreamController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/context/TraceContextFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/context/TraceContextFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/ingestion/KafkaMetricListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/ingestion/KafkaMetricListener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/AbstractPostgresIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/AbstractPostgresIntegrationTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/health/HealthAggregateTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/health/HealthAggregateTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/metrics/MetricStreamTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/metrics/MetricStreamTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/ingestion/KafkaIngestionTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/ingestion/KafkaIngestionTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/Titanic.java" beforeDir="false" afterPath="$PROJECT_DIR$/reactor/src/main/java/com/akfc/training/reactive/Titanic.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

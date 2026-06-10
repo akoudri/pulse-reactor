@@ -1,0 +1,3 @@
+# Intégration BlockHound de Pulse (lab J4-1 D), découverte par ServiceLoader et appliquée
+# automatiquement par blockhound-junit-platform. Voir la classe pour l'allowlist documentée.
+fr.janus.pulse.reactive.blockhound.PulseBlockHoundIntegration
