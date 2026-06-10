@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import fr.janus.pulse.common.MetricSample;
+import fr.janus.pulse.reactive.AbstractPostgresIntegrationTest;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Port injecté via {@code ${local.server.port}}.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class MetricStreamTest {
+class MetricStreamTest extends AbstractPostgresIntegrationTest {
 
     @Value("${local.server.port}")
     private int port;

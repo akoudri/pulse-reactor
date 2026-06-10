@@ -14,6 +14,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import fr.janus.pulse.reactive.AbstractPostgresIntegrationTest;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.serviceUnavailable;
@@ -25,7 +27,7 @@ import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
  * WebClient + timeout + retry + repli.
  */
 @SpringBootTest
-class HealthAggregateTest {
+class HealthAggregateTest extends AbstractPostgresIntegrationTest {
 
     private static WireMockServer wireMock;
 

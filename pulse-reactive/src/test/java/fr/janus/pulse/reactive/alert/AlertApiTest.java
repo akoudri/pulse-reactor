@@ -13,6 +13,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import fr.janus.pulse.common.Alert;
 import fr.janus.pulse.common.AlertRule;
 import fr.janus.pulse.common.Severity;
+import fr.janus.pulse.reactive.AbstractPostgresIntegrationTest;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * spring-test (déjà présent via WebFlux).
  */
 @SpringBootTest
-class AlertApiTest {
+class AlertApiTest extends AbstractPostgresIntegrationTest {
 
     @Autowired
     private ApplicationContext context;

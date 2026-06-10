@@ -1,9 +1,26 @@
 spring:
   application:
     name: pulse-reactive
+  # Connexion R2DBC vers la base `pulse` (docker compose --profile data, port 5432).
+  # Pas de driver à déclarer : R2DBC le découvre via le ConnectionFactory discovery.
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/pulse
+    username: pulse
+    password: pulse
+  # Joue schema.sql au démarrage (création de table). `always` car la base n'est pas
+  # embarquée. En test, Testcontainers fournit une base neuve à chaque run.
+  sql:
+    init:
+      mode: always
 
 server:
   port: 8080
+
+# Le traceId (propagé du WebFilter au log SQL via le Context + MDC) est injecté dans
+# chaque ligne de log. `%X{traceId:-}` lit le MDC ; vide hors d'une requête tracée.
+logging:
+  pattern:
+    level: "%5p [trace=%X{traceId:-}]"
 
 # Upstreams interrogés par le fan-out /api/health/aggregate.
 # base-url = upstream-sim (docker compose --profile upstream, port 8089).

@@ -38,9 +38,42 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Persistance réactive : Spring Data R2DBC (DatabaseClient, R2dbcRepository,
+             R2dbcTransactionManager auto-configuré) + driver R2DBC Postgres. Versions
+             via le BOM Boot, on ne pinne rien. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>r2dbc-postgresql</artifactId>
+        </dependency>
+
+        <!-- Propagation de contexte (Partie D) : SPI Micrometer qui ponte le Context
+             Reactor et les ThreadLocal (MDC). Requis par
+             Hooks.enableAutomaticContextPropagation(). Version via le BOM. -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>context-propagation</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Testcontainers 2.x (BOM Boot) : PostgreSQL éphémère pour les tests d'intégration
+             R2DBC (pas de base partagée). En TC 2.0 les modules sont préfixés
+             `testcontainers-*` (jadis `org.testcontainers:postgresql`). -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
