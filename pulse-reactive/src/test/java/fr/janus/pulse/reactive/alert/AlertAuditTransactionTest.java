@@ -9,7 +9,9 @@ import org.springframework.r2dbc.core.DatabaseClient;
 import fr.janus.pulse.common.AlertRule;
 import fr.janus.pulse.common.Severity;
 import fr.janus.pulse.reactive.AbstractPostgresIntegrationTest;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.test.publisher.TestPublisher;
 
 /**
  * Prouve la transaction réactive de {@link AlertService#createWithAudit} : succès commun
@@ -62,6 +64,46 @@ class AlertAuditTransactionTest extends AbstractPostgresIntegrationTest {
         // Rollback prouvé : aucune alerte sur cette métrique n'a survécu.
         StepVerifier.create(repository.findByMetricName(tooLong))
                 .verifyComplete();
+    }
+
+    /**
+     * Illustration de {@link TestPublisher} (reactor-test). Les deux tests ci-dessus prouvent le
+     * rollback au niveau de la <em>base</em> : une vraie contrainte ({@code target} VARCHAR étroit)
+     * fait échouer l'audit. Ici on descend au niveau des <strong>signaux réactifs</strong> : on
+     * reconstitue la composition de {@link AlertService#createWithAudit} — « sauver l'alerte, PUIS
+     * écrire l'audit, puis rendre l'alerte » — mais on remplace la jambe d'audit par un
+     * {@code TestPublisher<Void>} que l'on <strong>pilote à la main</strong>.
+     *
+     * <p>Ce que {@code TestPublisher} apporte (vs un simple {@code Mono.error(...)}) : on maîtrise
+     * l'<em>instant</em> des signaux — l'erreur est émise via {@code then()}, donc <strong>après</strong>
+     * la souscription, pas à l'assemblage — et l'on peut ensuite <em>asserter sur la source elle-même</em>
+     * ({@link TestPublisher#assertWasSubscribed()}, {@link TestPublisher#assertWasRequested()}). On prouve
+     * ainsi, sans base ni transaction, que l'échec de l'audit <strong>court-circuite</strong> l'émission
+     * de l'alerte : l'analogue, au niveau du flux, du rollback prouvé plus haut.
+     */
+    @Test
+    @DisplayName("TestPublisher : l'échec de la jambe d'audit court-circuite l'alerte (niveau signal)")
+    void auditFailureShortCircuitsAlertWithTestPublisher() {
+        // Source pilotable et CONFORME (demande respectée) : un Publisher<Void> dont le test
+        // déclenche lui-même next/complete/error — ici une erreur, au moment de son choix.
+        TestPublisher<Void> audit = TestPublisher.create();
+
+        // Même forme que createWithAudit : alerte « sauvée », PUIS audit, PUIS on rend l'alerte.
+        Mono<String> savedThenAudited =
+                Mono.just("alert-42")
+                        .flatMap(saved -> Mono.from(audit).thenReturn(saved));
+
+        StepVerifier.create(savedThenAudited)
+                // L'audit échoue APRÈS la souscription : c'est le test qui choisit l'instant exact.
+                .then(() -> audit.error(new IllegalStateException("écriture d'audit refusée")))
+                // L'erreur de l'audit remonte : l'alerte (« alert-42 ») n'est jamais émise.
+                .expectErrorMessage("écriture d'audit refusée")
+                .verify();
+
+        // TestPublisher s'auto-vérifie : la jambe d'audit a bien été atteinte (souscrite et demandée),
+        // ce qui confirme l'ordre de composition « alerte -> audit » (l'alerte n'a pas court-circuité l'audit).
+        audit.assertWasSubscribed();
+        audit.assertWasRequested();
     }
 
     private reactor.core.publisher.Mono<Long> countAuditFor(String metric) {
