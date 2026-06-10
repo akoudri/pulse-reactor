@@ -46,15 +46,17 @@ public class AlertController {
      */
     @GetMapping("/by-metric")
     public Flux<MetricAlertCount> byMetric() {
-        // TODO: déléguer à l'agrégat countByMetric() du service
-        return null;
+        return service.countByMetric();
     }
 
     @GetMapping("/{id}")
     public Mono<ResponseEntity<Alert>> byId(@PathVariable String id) {
-        // TODO: déléguer au service ; 200 si présent, 404 sinon
-        // TODO: logguer l'entrée du contrôleur à la souscription (doFirst) pour la corrélation traceId
-        return null;
+        // doFirst : le log s'exécute à la souscription (dans le pipeline), pas à l'assemblage —
+        // le Context est alors établi et le traceId est dans le MDC (propagation automatique).
+        return service.byId(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .doFirst(() -> log.info("entrée contrôleur GET /api/alerts/{}", id));
     }
 
     @PostMapping

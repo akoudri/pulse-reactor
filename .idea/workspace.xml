@@ -6,14 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="a64751c8-cac3-431c-94a2-2d31424f10c2" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/PulseReactiveApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/PulseReactiveApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertController.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertService.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertApiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertApiTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/health/HealthAggregateTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/health/HealthAggregateTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/metrics/MetricStreamTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/metrics/MetricStreamTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -25,7 +25,7 @@ public class ContextPropagationConfig {
 
     @PostConstruct
     void enableContextPropagation() {
-        // TODO: activer la propagation automatique (Hooks) et enregistrer le ThreadLocalAccessor
-        //       (traceId ↔ MDC) dans le ContextRegistry de Micrometer
+        Hooks.enableAutomaticContextPropagation();
+        ContextRegistry.getInstance().registerThreadLocalAccessor(new TraceIdThreadLocalAccessor());
     }
 }

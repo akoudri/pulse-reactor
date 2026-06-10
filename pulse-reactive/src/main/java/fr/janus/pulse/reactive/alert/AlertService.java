@@ -34,31 +34,44 @@ public class AlertService {
     }
 
     public Flux<Alert> all() {
-        // TODO: renvoyer toutes les alertes du repository, mappées en DTO
-        return null;
+        return repository.findAll().map(AlertService::toDto);
     }
 
     public Mono<Alert> byId(String id) {
-        // TODO: convertir l'id String en clé Long (Mono.empty() si non numérique → 404)
-        // TODO: via Mono.deferContextual, logguer avant l'accès R2DBC en lisant le tenant du
-        //       Context, puis findById ; mapper en DTO et logguer après l'accès
-        return null;
+        // L'API expose un id String ; la clé technique est un Long. Un id non numérique
+        // ne correspond à rien en base → Mono vide (→ 404 côté contrôleur).
+        Long key;
+        try {
+            key = Long.valueOf(id);
+        } catch (NumberFormatException notNumeric) {
+            return Mono.empty();
+        }
+        // deferContextual : lecture EXPLICITE du Context au fond du pipeline (le tenant),
+        // à côté de l'accès R2DBC. Le traceId, lui, est dans le MDC via la propagation
+        // automatique — il apparaît donc dans ce log comme dans celui du contrôleur, malgré
+        // le changement de thread entre l'entrée HTTP et le driver R2DBC.
+        return Mono.deferContextual(ctx -> {
+                    log.info("avant accès R2DBC findById({}) — tenant={}",
+                            key, ctx.getOrDefault(TraceContextFilter.TENANT_KEY, "unknown"));
+                    return repository.findById(key);
+                })
+                .map(AlertService::toDto)
+                .doOnTerminate(() -> log.info("après accès R2DBC findById({})", key));
     }
 
     public Mono<Alert> create(AlertRule rule) {
-        // TODO: sauvegarder une nouvelle AlertEntity issue de la règle, puis mapper en DTO
-        return null;
+        return repository.save(AlertEntity.newAlert(
+                        rule.metricName(), rule.threshold(), rule.severity(), Instant.now()))
+                .map(AlertService::toDto);
     }
 
     public Mono<Long> count() {
-        // TODO: déléguer le comptage au repository
-        return null;
+        return repository.count();
     }
 
     /** Alertes d'une métrique donnée (s'appuie sur la query method dérivée). */
     public Flux<Alert> byMetric(String metricName) {
-        // TODO: query method dérivée findByMetricName, mappée en DTO
-        return null;
+        return repository.findByMetricName(metricName).map(AlertService::toDto);
     }
 
     /**
@@ -70,8 +83,10 @@ public class AlertService {
      */
     @Transactional
     public Mono<Alert> createWithAudit(AlertRule rule) {
-        // TODO: sauvegarder l'alerte PUIS écrire l'audit dans la même transaction, mapper en DTO
-        return null;
+        return repository.save(AlertEntity.newAlert(
+                        rule.metricName(), rule.threshold(), rule.severity(), Instant.now()))
+                .flatMap(saved -> writeAudit(saved).thenReturn(saved))
+                .map(AlertService::toDto);
     }
 
     /**
@@ -80,8 +95,16 @@ public class AlertService {
      * déclenche le rollback de toute la transaction (alerte comprise) — le levier du test.
      */
     private Mono<Void> writeAudit(AlertEntity saved) {
-        // TODO: insérer une ligne dans audit_log via DatabaseClient (l'échec déclenche le rollback)
-        return null;
+        return databaseClient.sql("""
+                        INSERT INTO audit_log(alert_id, action, target, logged_at)
+                        VALUES (:alertId, :action, :target, :loggedAt)
+                        """)
+                .bind("alertId", saved.id())
+                .bind("action", "CREATE")
+                .bind("target", saved.metricName())
+                .bind("loggedAt", Instant.now())
+                .fetch().rowsUpdated()
+                .then();
     }
 
     /**
@@ -90,13 +113,25 @@ public class AlertService {
      * {@code Flux}, rien ne s'exécute avant la souscription.
      */
     public Flux<MetricAlertCount> countByMetric() {
-        // TODO: agrégat GROUP BY metric_name via DatabaseClient, renvoyé en Flux<MetricAlertCount>
-        return null;
+        return databaseClient.sql("""
+                        SELECT metric_name, COUNT(*) AS alert_count
+                        FROM alert
+                        GROUP BY metric_name
+                        ORDER BY metric_name
+                        """)
+                .map((row, metadata) -> new MetricAlertCount(
+                        row.get("metric_name", String.class),
+                        row.get("alert_count", Long.class)))
+                .all();
     }
 
     /** Mapping entité R2DBC → DTO d'API (id Long → String pour respecter le contrat). */
     private static Alert toDto(AlertEntity entity) {
-        // TODO: mapper l'entité R2DBC vers le DTO Alert (id Long → String)
-        return null;
+        return new Alert(
+                String.valueOf(entity.id()),
+                entity.metricName(),
+                entity.threshold(),
+                entity.severity(),
+                entity.createdAt());
     }
 }

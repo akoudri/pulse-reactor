@@ -60,13 +60,27 @@ class ContextPropagationTest extends AbstractPostgresIntegrationTest {
     @Test
     @DisplayName("X-Trace-Id corrélé du filtre au log SQL (même traceId, deux threads), tenant lu du Context")
     void correlatesTraceFromFilterToSqlLog() {
-        // TODO: GET /api/alerts/{id} avec les headers X-Trace-Id et X-Tenant, puis vérifier
-        //       que le MÊME traceId apparaît dans le MDC du log d'entrée du contrôleur ET du
-        //       log d'accès R2DBC, et que le tenant a bien été lu du Context (deferContextual)
+        String trace = "trace-" + System.nanoTime();
+
+        client.get().uri("/api/alerts/{id}", "999999") // inexistant → 404, mais les logs émettent
+                .header(TraceContextFilter.TRACE_HEADER, trace)
+                .header(TraceContextFilter.TENANT_HEADER, "acme")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        boolean controllerLogHasTrace = appender.list.stream().anyMatch(e ->
+                e.getMessage().contains("entrée contrôleur") && trace.equals(mdcTrace(e)));
+        boolean sqlLogHasTrace = appender.list.stream().anyMatch(e ->
+                e.getMessage().contains("avant accès R2DBC") && trace.equals(mdcTrace(e)));
+        boolean tenantReadFromContext = appender.list.stream().anyMatch(e ->
+                e.getFormattedMessage().contains("tenant=acme"));
+
+        assertTrue(controllerLogHasTrace, "le traceId doit être dans le MDC du log d'entrée du contrôleur");
+        assertTrue(sqlLogHasTrace, "le MÊME traceId doit être dans le MDC du log d'accès R2DBC");
+        assertTrue(tenantReadFromContext, "le tenant doit avoir été lu explicitement du Context (deferContextual)");
     }
 
     private static String mdcTrace(ILoggingEvent event) {
-        // TODO: extraire le traceId de la MDCPropertyMap de l'événement de log
-        return null;
+        return event.getMDCPropertyMap().get(TraceIdThreadLocalAccessor.KEY);
     }
 }

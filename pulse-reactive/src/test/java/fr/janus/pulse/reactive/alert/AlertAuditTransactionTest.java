@@ -31,19 +31,47 @@ class AlertAuditTransactionTest extends AbstractPostgresIntegrationTest {
     @Test
     @DisplayName("succès : alerte ET ligne d'audit persistées dans la même transaction")
     void commitsAlertAndAudit() {
-        // TODO: createWithAudit avec un metricName court → l'alerte ET sa ligne d'audit sont
-        //       persistées dans la même transaction (vérifier via StepVerifier)
+        String metric = "ok." + System.nanoTime(); // court (<64) → audit OK
+
+        StepVerifier.create(service.createWithAudit(new AlertRule(metric, 70.0, Severity.WARNING)))
+                .assertNext(alert -> org.junit.jupiter.api.Assertions.assertEquals(metric, alert.metricName()))
+                .verifyComplete();
+
+        // L'alerte est bien là...
+        StepVerifier.create(repository.findByMetricName(metric))
+                .expectNextCount(1)
+                .verifyComplete();
+        // ...et exactement une ligne d'audit y correspond.
+        StepVerifier.create(countAuditFor(metric))
+                .expectNext(1L)
+                .verifyComplete();
     }
 
     @Test
     @DisplayName("échec de l'audit → rollback : l'alerte n'est PAS persistée")
     void rollsBackAlertWhenAuditFails() {
-        // TODO: forcer l'échec de l'audit (metricName trop long pour audit_log.target) et
-        //       prouver le ROLLBACK : aucune alerte sur cette métrique n'est persistée
+        // metricName > 64 caractères : l'insert dans audit_log.target (VARCHAR(64)) échoue,
+        // alors que la colonne alert.metric_name (VARCHAR(120)) l'aurait accepté.
+        String tooLong = "x".repeat(70) + "." + System.nanoTime();
+        org.junit.jupiter.api.Assertions.assertTrue(tooLong.length() > 64 && tooLong.length() <= 120);
+
+        StepVerifier.create(service.createWithAudit(new AlertRule(tooLong, 70.0, Severity.CRITICAL)))
+                .expectError()
+                .verify();
+
+        // Rollback prouvé : aucune alerte sur cette métrique n'a survécu.
+        StepVerifier.create(repository.findByMetricName(tooLong))
+                .verifyComplete();
     }
 
     private reactor.core.publisher.Mono<Long> countAuditFor(String metric) {
-        // TODO: compter les lignes d'audit liées à cette métrique via DatabaseClient
-        return null;
+        return databaseClient.sql("""
+                        SELECT COUNT(*) AS c FROM audit_log a
+                        JOIN alert al ON al.id = a.alert_id
+                        WHERE al.metric_name = :metric
+                        """)
+                .bind("metric", metric)
+                .map((row, meta) -> row.get("c", Long.class))
+                .one();
     }
 }

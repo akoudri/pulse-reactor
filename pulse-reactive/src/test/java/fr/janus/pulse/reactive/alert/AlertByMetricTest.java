@@ -33,11 +33,30 @@ class AlertByMetricTest extends AbstractPostgresIntegrationTest {
     @Test
     @DisplayName("by-metric agrège le nombre d'alertes par métrique (GROUP BY)")
     void aggregatesCountPerMetric() {
-        // TODO: créer 2 alertes sur une même métrique, appeler GET /api/alerts/by-metric
-        //       et vérifier que le count agrégé (GROUP BY) vaut bien 2 pour cette métrique
+        String metric = "pulse.gc.pause." + System.nanoTime(); // unique → comptage déterministe
+        createAlert(metric, Severity.WARNING);
+        createAlert(metric, Severity.CRITICAL);
+
+        client.get().uri("/api/alerts/by-metric")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(MetricAlertCount.class)
+                .value(rows -> {
+                    long forMetric = rows.stream()
+                            .filter(r -> r.metricName().equals(metric))
+                            .mapToLong(MetricAlertCount::count)
+                            .findFirst()
+                            .orElse(-1);
+                    org.junit.jupiter.api.Assertions.assertEquals(2L, forMetric,
+                            "deux alertes ont été créées sur cette métrique");
+                });
     }
 
     private void createAlert(String metric, Severity severity) {
-        // TODO: POST /api/alerts pour créer une alerte (attendre 201 Created)
+        client.post().uri("/api/alerts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new AlertRule(metric, 50.0, severity))
+                .exchange()
+                .expectStatus().isCreated();
     }
 }

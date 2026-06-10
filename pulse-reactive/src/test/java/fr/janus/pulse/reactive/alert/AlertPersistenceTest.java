@@ -24,14 +24,25 @@ class AlertPersistenceTest extends AbstractPostgresIntegrationTest {
     @Test
     @DisplayName("save() insère et renvoie l'entité avec son id généré, findById() la relit")
     void saveThenFindById() {
-        // TODO: save() insère et renvoie l'entité avec son id généré ; findById() la relit
-        //       — piloter via StepVerifier (jamais de block())
+        AlertEntity toSave = AlertEntity.newAlert("pulse.disk.io", 95.0, Severity.CRITICAL, Instant.now());
+
+        StepVerifier.create(repository.save(toSave))
+                .assertNext(saved -> {
+                    org.junit.jupiter.api.Assertions.assertNotNull(saved.id(), "l'id doit être généré");
+                    org.junit.jupiter.api.Assertions.assertEquals("pulse.disk.io", saved.metricName());
+                    org.junit.jupiter.api.Assertions.assertEquals(Severity.CRITICAL, saved.severity());
+                })
+                .verifyComplete();
     }
 
     @Test
     @DisplayName("findByMetricName() (query method dérivée) ne renvoie que la bonne métrique")
     void findByMetricNameFiltersByMetric() {
-        // TODO: vérifier que la query method dérivée findByMetricName ne renvoie que la
-        //       métrique demandée (StepVerifier)
+        String metric = "pulse.net.rx." + System.nanoTime(); // unique → isolation entre tests
+        AlertEntity entity = AlertEntity.newAlert(metric, 10.0, Severity.WARNING, Instant.now());
+
+        StepVerifier.create(repository.save(entity).thenMany(repository.findByMetricName(metric)))
+                .assertNext(found -> org.junit.jupiter.api.Assertions.assertEquals(metric, found.metricName()))
+                .verifyComplete();
     }
 }

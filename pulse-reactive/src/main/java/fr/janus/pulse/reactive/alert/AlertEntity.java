@@ -38,7 +38,6 @@ public record AlertEntity(
 
     /** Nouvelle entité non encore persistée (id null → insert). */
     static AlertEntity newAlert(String metricName, double threshold, Severity severity, Instant createdAt) {
-        // TODO: construire une entité non encore persistée (id null → insert)
-        return null;
+        return new AlertEntity(null, metricName, threshold, severity, createdAt);
     }
 }

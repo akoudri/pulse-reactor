@@ -34,13 +34,17 @@ public class TraceContextFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        // TODO: récupérer/générer le traceId (header X-Trace-Id) et le tenant (header X-Tenant)
-        // TODO: poursuivre la chaîne en écrivant traceId + tenant dans le Context (contextWrite)
-        return null;
+        String traceId = headerOr(exchange, TRACE_HEADER, () -> UUID.randomUUID().toString());
+        String tenant = headerOr(exchange, TENANT_HEADER, () -> "default");
+
+        return chain.filter(exchange)
+                .contextWrite(Context.of(
+                        TraceIdThreadLocalAccessor.KEY, traceId,
+                        TENANT_KEY, tenant));
     }
 
     private static String headerOr(ServerWebExchange exchange, String header, java.util.function.Supplier<String> fallback) {
-        // TODO: renvoyer la valeur du header si présente, sinon la valeur de repli
-        return null;
+        String value = exchange.getRequest().getHeaders().getFirst(header);
+        return (value == null || value.isBlank()) ? fallback.get() : value;
     }
 }

@@ -21,23 +21,21 @@ public final class TraceIdThreadLocalAccessor implements ThreadLocalAccessor<Str
 
     @Override
     public Object key() {
-        // TODO: renvoyer la clé exposée du Context (traceId)
-        return null;
+        return KEY;
     }
 
     @Override
     public String getValue() {
-        // TODO: lire la valeur courante depuis le MDC
-        return null;
+        return MDC.get(KEY);
     }
 
     @Override
     public void setValue(String value) {
-        // TODO: poser la valeur dans le MDC
+        MDC.put(KEY, value);
     }
 
     @Override
     public void setValue() {
-        // TODO: retirer la valeur du MDC
+        MDC.remove(KEY);
     }
 }

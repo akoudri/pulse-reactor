@@ -26,6 +26,9 @@ public abstract class AbstractPostgresIntegrationTest {
 
     @DynamicPropertySource
     static void r2dbcProperties(DynamicPropertyRegistry registry) {
-        // TODO: câbler spring.r2dbc.url / username / password sur le conteneur Postgres éphémère
+        registry.add("spring.r2dbc.url", () -> "r2dbc:postgresql://%s:%d/%s".formatted(
+                POSTGRES.getHost(), POSTGRES.getFirstMappedPort(), POSTGRES.getDatabaseName()));
+        registry.add("spring.r2dbc.username", POSTGRES::getUsername);
+        registry.add("spring.r2dbc.password", POSTGRES::getPassword);
     }
 }
