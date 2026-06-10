@@ -13,8 +13,48 @@ spring:
     init:
       mode: always
 
+  # Ingestion Kafka (lab J3-2). Le broker tourne via docker compose --profile streaming
+  # (apache/kafka, port 9092). Clés ET valeurs transitent en String : on (dé)sérialise
+  # MetricSample en JSON via le mapper Jackson 3 de Spring (cf. KafkaMetricListener /
+  # AgentSimulator), indépendamment de la version Jackson embarquée par le JsonSerializer
+  # de spring-kafka (qui, sous Boot 4, défaut sur un mapper Jackson 2 sans support java.time).
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: pulse-ingestion
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    listener:
+      # Le pont applique sa propre stratégie de backpressure (pause/resume du conteneur,
+      # lab J3-2 B) : on commit explicitement après émission réussie dans le Sinks.
+      ack-mode: manual
+      # Ne démarre PAS les @KafkaListener par défaut : les @SpringBootTest sans broker
+      # (alerte, santé, SSE) démarrent ainsi sans spammer de connexions refusées. Le test
+      # d'ingestion (Testcontainers) réactive auto-startup=true.
+      auto-startup: false
+
 server:
   port: 8080
+
+# Observabilité (lab J3-2 D) : on expose /actuator/prometheus (scrape) + health.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  health:
+    # L'indicateur de santé Kafka tenterait une connexion au broker : inutile hors profil
+    # streaming et coûteux en l'absence de broker. On le désactive (ingestion observée via métriques).
+    kafka:
+      enabled: false
 
 # Le traceId (propagé du WebFilter au log SQL via le Context + MDC) est injecté dans
 # chaque ligne de log. `%X{traceId:-}` lit le MDC ; vide hors d'une requête tracée.
@@ -22,9 +62,16 @@ logging:
   pattern:
     level: "%5p [trace=%X{traceId:-}]"
 
-# Upstreams interrogés par le fan-out /api/health/aggregate.
-# base-url = upstream-sim (docker compose --profile upstream, port 8089).
 pulse:
+  # Ingestion Kafka : topic source des métriques + simulateur d'agents (KafkaTemplate).
+  ingestion:
+    topic: metrics
+    # Simulateur d'agents : publie des échantillons sur le topic à intervalle. Désactivé
+    # en test (les tests pilotent eux-mêmes les émissions / la production Kafka).
+    simulator:
+      enabled: true
+  # Upstreams interrogés par le fan-out /api/health/aggregate.
+  # base-url = upstream-sim (docker compose --profile upstream, port 8089).
   upstream:
     base-url: http://localhost:8089
     endpoints:

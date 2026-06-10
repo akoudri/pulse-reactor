@@ -30,5 +30,14 @@ public abstract class AbstractPostgresIntegrationTest {
                 POSTGRES.getHost(), POSTGRES.getFirstMappedPort(), POSTGRES.getDatabaseName()));
         registry.add("spring.r2dbc.username", POSTGRES::getUsername);
         registry.add("spring.r2dbc.password", POSTGRES::getPassword);
+        // Le simulateur d'agents (producteur Kafka) reste éteint par défaut en test : sans
+        // broker, ses publications bloqueraient. Le test d'ingestion Kafka, qui démarre un
+        // broker Testcontainers, produit explicitement via KafkaTemplate.
+        registry.add("pulse.ingestion.simulator.enabled", () -> "false");
+        // Le simulateur de métriques (MetricSimulator) pousse aussi des échantillons « agent-sim »
+        // directement dans le MetricStream (hors Kafka). Éteint en test : les tests pilotent
+        // eux-mêmes les émissions du pont (sinon ses échantillons polluent le flux chaud partagé,
+        // p. ex. en devançant le message produit par KafkaIngestionTest).
+        registry.add("pulse.simulator.enabled", () -> "false");
     }
 }

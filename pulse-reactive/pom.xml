@@ -14,6 +14,11 @@
     <name>Pulse Reactive</name>
     <description>API réactive : WebFlux + Reactor (port 8080). Jumeau réactif du différentiel.</description>
 
+    <properties>
+        <!-- Resilience4j hors BOM Boot : version pinnée (2.x compatible Reactor 3.x). -->
+        <resilience4j.version>2.3.0</resilience4j.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>fr.janus.pulse</groupId>
@@ -38,6 +43,22 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Observabilité (lab J3-2 D) : Actuator + registry Prometheus → /actuator/prometheus.
+             Métriques d'ingestion / agrégation / ouvertures de circuit via Micrometer.
+             NB tracing : on ne branche PAS de bridge Micrometer Tracing (brave/otel) ici — il
+             instrumenterait aussi HTTP et écraserait le traceId custom du lab J3-1 dans le MDC.
+             On réutilise la propagation de contexte de J3-1 (même clé traceId + accessor) pour
+             corréler la frontière Kafka → pipeline → push SSE ; un bridge se grefferait sur la
+             même SPI context-propagation sans changer le code applicatif. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
         <!-- Persistance réactive : Spring Data R2DBC (DatabaseClient, R2dbcRepository,
              R2dbcTransactionManager auto-configuré) + driver R2DBC Postgres. Versions
              via le BOM Boot, on ne pinne rien. -->
@@ -48,6 +69,39 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>r2dbc-postgresql</artifactId>
+        </dependency>
+
+        <!-- Ingestion Kafka (lab J3-2 A) : le client Kafka Java est bloquant par nature,
+             on le bridge en Flux via un Sinks (PAS de reactor-kafka, discontinué en mai 2025).
+             En Boot 4 l'auto-configuration Kafka (ProducerFactory, KafkaTemplate, container
+             factory) vit dans le module dédié `spring-boot-kafka` — `spring-kafka` seul
+             n'apporte que la lib, pas les beans auto-configurés (même logique que
+             `spring-boot-webclient`). Version via le BOM, alignée Jackson 3. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-kafka</artifactId>
+        </dependency>
+
+        <!-- Résilience (lab J3-2 C). Le natif Spring Framework 7 (@Retryable sur retour
+             réactif, circuit breaker des Interface Clients) est privilégié quand on contrôle
+             le client ; ici on garde un WebClient direct et on utilise les opérateurs Reactor
+             de Resilience4j (transformDeferred(CircuitBreakerOperator/BulkheadOperator)). Hors
+             BOM Boot → versions pinnées. On n'ajoute PAS le starter Boot R4J (auto-config non
+             alignée Boot 4) : beans créés explicitement, config visible. -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-reactor</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-circuitbreaker</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-bulkhead</artifactId>
+            <version>${resilience4j.version}</version>
         </dependency>
 
         <!-- Propagation de contexte (Partie D) : SPI Micrometer qui ponte le Context
@@ -74,6 +128,21 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Kafka éphémère (image apache/kafka, KRaft) pour les tests d'intégration de
+             l'ingestion. En TC 2.x : module `testcontainers-kafka`, classe
+             `org.testcontainers.kafka.KafkaContainer` (supporte apache/kafka). -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-kafka</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Utilitaires de test spring-kafka (ContainerTestUtils.waitForAssignment) pour
+             attendre l'assignation de partition avant de produire → test déterministe. -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
