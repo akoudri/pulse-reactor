@@ -2,10 +2,12 @@ package fr.janus.pulse.reactive.alert;
 
 import java.time.Instant;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -13,11 +15,13 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import fr.janus.pulse.common.Alert;
 import fr.janus.pulse.common.AlertRule;
 import fr.janus.pulse.common.Severity;
+import fr.janus.pulse.reactive.security.SecurityConfig;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 /**
  * Slice test du contrôleur d'alertes : {@link WebFluxTest} ne charge <strong>que</strong>
@@ -31,7 +35,11 @@ import static org.mockito.Mockito.when;
  * statut 200/201/404, sérialisation JSON, et 400 sur payload invalide (validation
  * {@code @Valid}). La logique de persistance est couverte ailleurs (tests d'intégration R2DBC).
  */
+// La sécurité réactive (lab J4-2 A) s'applique aussi au slice : on importe SecurityConfig
+// (utilisateurs en mémoire, non bloquant) et on authentifie le client en HTTP Basic. Le slice
+// reste centré sur le contrat HTTP du contrôleur ; l'association au principal est testée ailleurs.
 @WebFluxTest(AlertController.class)
+@Import(SecurityConfig.class)
 class AlertControllerSliceTest {
 
     private static final Instant AT = Instant.parse("2026-06-01T10:00:00Z");
@@ -41,6 +49,11 @@ class AlertControllerSliceTest {
 
     @MockitoBean
     private AlertService service;
+
+    @BeforeEach
+    void authenticate() {
+        client = client.mutate().filter(basicAuthentication("user", "password")).build();
+    }
 
     @Test
     @DisplayName("GET /api/alerts : la liste du service est sérialisée (200)")

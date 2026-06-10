@@ -21,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 /**
  * Vérifie le flux SSE {@code /api/metrics/stream} : le corps {@code text/event-stream} sert le
@@ -49,6 +50,8 @@ class MetricStreamTest extends AbstractPostgresIntegrationTest {
     void setUp() {
         client = WebTestClient.bindToServer()
                 .baseUrl("http://localhost:" + port)
+                // /api/metrics/stream est sécurisé (lab J4-2 A) → auth HTTP Basic.
+                .filter(basicAuthentication("user", "password"))
                 .build();
         // Pousse en continu dans le pont (source hot) : les abonnés SSE qui se connectent
         // reçoivent les émissions suivantes (multicast, sans rejeu).

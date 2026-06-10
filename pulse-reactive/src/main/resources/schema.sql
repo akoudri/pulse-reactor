@@ -9,6 +9,12 @@ CREATE TABLE IF NOT EXISTS alert (
     created_at  TIMESTAMPTZ      NOT NULL
 );
 
+-- Propriétaire de l'alerte (lab J4-2 A) : renseigné à partir du principal authentifié, lu via
+-- ReactiveSecurityContextHolder DANS le pipeline réactif de création (preuve que le
+-- SecurityContext traverse les changements de thread). ALTER IF NOT EXISTS : idempotent même
+-- contre une table `alert` déjà créée par un lab précédent (la base docker n'est pas éphémère).
+ALTER TABLE alert ADD COLUMN IF NOT EXISTS created_by VARCHAR(120);
+
 -- Trace d'audit écrite dans la MÊME transaction que l'alerte (Partie C).
 -- `target` (qui reçoit le metric_name) est volontairement plus étroite que
 -- alert.metric_name (VARCHAR(64) vs VARCHAR(120)) : c'est le levier qui permet, en test,

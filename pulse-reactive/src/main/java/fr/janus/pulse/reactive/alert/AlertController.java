@@ -49,6 +49,17 @@ public class AlertController {
         return service.countByMetric();
     }
 
+    /**
+     * « Mes alertes » (lab J4-2 A) : les alertes créées par l'utilisateur authentifié. Le
+     * principal est lu via {@code ReactiveSecurityContextHolder} dans le service — preuve que le
+     * {@code SecurityContext} traverse le pipeline. Chemin littéral {@code /mine} : il prime sur
+     * {@code /{id}}, pas de collision de routage.
+     */
+    @GetMapping("/mine")
+    public Flux<Alert> mine() {
+        return service.mine();
+    }
+
     @GetMapping("/{id}")
     public Mono<ResponseEntity<Alert>> byId(@PathVariable String id) {
         // doFirst : le log s'exécute à la souscription (dans le pipeline), pas à l'assemblage —

@@ -24,7 +24,7 @@ class AlertPersistenceTest extends AbstractPostgresIntegrationTest {
     @Test
     @DisplayName("save() insère et renvoie l'entité avec son id généré, findById() la relit")
     void saveThenFindById() {
-        AlertEntity toSave = AlertEntity.newAlert("pulse.disk.io", 95.0, Severity.CRITICAL, Instant.now());
+        AlertEntity toSave = AlertEntity.newAlert("pulse.disk.io", 95.0, Severity.CRITICAL, Instant.now(), "system");
 
         StepVerifier.create(repository.save(toSave))
                 .assertNext(saved -> {
@@ -39,7 +39,7 @@ class AlertPersistenceTest extends AbstractPostgresIntegrationTest {
     @DisplayName("findByMetricName() (query method dérivée) ne renvoie que la bonne métrique")
     void findByMetricNameFiltersByMetric() {
         String metric = "pulse.net.rx." + System.nanoTime(); // unique → isolation entre tests
-        AlertEntity entity = AlertEntity.newAlert(metric, 10.0, Severity.WARNING, Instant.now());
+        AlertEntity entity = AlertEntity.newAlert(metric, 10.0, Severity.WARNING, Instant.now(), "system");
 
         StepVerifier.create(repository.save(entity).thenMany(repository.findByMetricName(metric)))
                 .assertNext(found -> org.junit.jupiter.api.Assertions.assertEquals(metric, found.metricName()))

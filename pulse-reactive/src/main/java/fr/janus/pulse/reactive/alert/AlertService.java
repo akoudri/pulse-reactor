@@ -5,6 +5,9 @@ import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,10 +62,42 @@ public class AlertService {
                 .doOnTerminate(() -> log.info("après accès R2DBC findById({})", key));
     }
 
+    /**
+     * Crée une alerte en l'<strong>associant à l'utilisateur authentifié</strong> (lab J4-2 A).
+     * Le principal est lu via {@link ReactiveSecurityContextHolder} — c'est-à-dire dans le
+     * {@code Context} Reactor, <em>au fond du pipeline</em>, après que la requête HTTP a changé
+     * de thread depuis l'event-loop Netty. Qu'on retrouve ici le bon utilisateur prouve que le
+     * {@code SecurityContext} traverse le pipeline réactif (lien J3-1), sans {@code ThreadLocal} nu.
+     */
     public Mono<Alert> create(AlertRule rule) {
-        return repository.save(AlertEntity.newAlert(
-                        rule.metricName(), rule.threshold(), rule.severity(), Instant.now()))
+        return currentUser().flatMap(user -> {
+            log.info("création d'alerte metric={} par user={}", rule.metricName(), user);
+            return repository.save(AlertEntity.newAlert(
+                    rule.metricName(), rule.threshold(), rule.severity(), Instant.now(), user));
+        }).map(AlertService::toDto);
+    }
+
+    /**
+     * « Mes alertes » : celles créées par l'utilisateur courant. Le principal est de nouveau lu
+     * via {@link ReactiveSecurityContextHolder} dans le pipeline, puis utilisé pour la requête
+     * dérivée {@code findByCreatedBy} — un utilisateur ne voit que ses propres alertes.
+     */
+    public Flux<Alert> mine() {
+        return currentUser()
+                .flatMapMany(repository::findByCreatedBy)
                 .map(AlertService::toDto);
+    }
+
+    /**
+     * Nom du principal authentifié, lu réactivement depuis le {@code Context}. Hors d'une requête
+     * authentifiée (ex. ingestion interne, test de service), le contexte de sécurité est vide :
+     * on retombe sur {@code "system"} plutôt que d'échouer.
+     */
+    private Mono<String> currentUser() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(Authentication::getName)
+                .defaultIfEmpty("system");
     }
 
     public Mono<Long> count() {
@@ -83,8 +118,9 @@ public class AlertService {
      */
     @Transactional
     public Mono<Alert> createWithAudit(AlertRule rule) {
-        return repository.save(AlertEntity.newAlert(
-                        rule.metricName(), rule.threshold(), rule.severity(), Instant.now()))
+        return currentUser()
+                .flatMap(user -> repository.save(AlertEntity.newAlert(
+                        rule.metricName(), rule.threshold(), rule.severity(), Instant.now(), user)))
                 .flatMap(saved -> writeAudit(saved).thenReturn(saved))
                 .map(AlertService::toDto);
     }

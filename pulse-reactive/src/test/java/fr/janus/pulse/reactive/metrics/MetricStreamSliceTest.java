@@ -2,10 +2,12 @@ package fr.janus.pulse.reactive.metrics;
 
 import java.time.Instant;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -13,11 +15,13 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import fr.janus.pulse.common.EnrichedSample;
 import fr.janus.pulse.common.MetricSample;
 import fr.janus.pulse.reactive.ingestion.MetricIngestion;
+import fr.janus.pulse.reactive.security.SecurityConfig;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 /**
  * Slice test SSE de {@link MetricStreamController} : {@code @WebFluxTest} ne charge que le
@@ -35,13 +39,20 @@ import static org.mockito.Mockito.when;
  * produit réellement évite le blocage observé sur un flux qui n'émet jamais. {@code take(2)}
  * prélève un préfixe strict du flux.
  */
+// Sécurité réactive (lab J4-2 A) appliquée au slice : SecurityConfig importé + auth HTTP Basic.
 @WebFluxTest(MetricStreamController.class)
+@Import(SecurityConfig.class)
 class MetricStreamSliceTest {
 
     private static final Instant AT = Instant.parse("2026-06-01T10:00:00Z");
 
     @Autowired
     private WebTestClient client;
+
+    @BeforeEach
+    void authenticate() {
+        client = client.mutate().filter(basicAuthentication("user", "password")).build();
+    }
 
     @MockitoBean
     private MetricIngestion ingestion;

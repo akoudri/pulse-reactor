@@ -5,8 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a64751c8-cac3-431c-94a2-2d31424f10c2" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/PulseReactiveApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/PulseReactiveApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertController.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertService.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/alert/AlertService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/health/HealthAggregator.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/java/fr/janus/pulse/reactive/health/HealthAggregator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/main/resources/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/main/resources/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/AbstractPostgresIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/AbstractPostgresIntegrationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertApiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertApiTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertAuditTransactionTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertAuditTransactionTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertByMetricTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertByMetricTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertControllerSliceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertControllerSliceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertPersistenceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/alert/AlertPersistenceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/context/ContextPropagationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/context/ContextPropagationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/e2e/KafkaToSseEndToEndTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/e2e/KafkaToSseEndToEndTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/health/HealthAggregateTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/health/HealthAggregateTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/metrics/MetricStreamSliceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/metrics/MetricStreamSliceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/metrics/MetricStreamTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/metrics/MetricStreamTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/observability/PrometheusMetricsTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/pulse-reactive/src/test/java/fr/janus/pulse/reactive/observability/PrometheusMetricsTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,33 +62,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.CompoExample.executor&quot;: &quot;Run&quot;,
-    &quot;Application.FluxCreate.executor&quot;: &quot;Run&quot;,
-    &quot;Application.FluxErrors.executor&quot;: &quot;Run&quot;,
-    &quot;Application.FluxEvents.executor&quot;: &quot;Run&quot;,
-    &quot;Application.FluxFlatMap.executor&quot;: &quot;Run&quot;,
-    &quot;Application.FluxGenerate.executor&quot;: &quot;Run&quot;,
-    &quot;Application.MonoCreate.executor&quot;: &quot;Run&quot;,
-    &quot;Application.MultiCastFlux.executor&quot;: &quot;Run&quot;,
-    &quot;Application.ReactiveStreamExercise.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/ali/Training/pulse-reactor&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.CompoExample.executor": "Run",
+    "Application.FluxCreate.executor": "Run",
+    "Application.FluxErrors.executor": "Run",
+    "Application.FluxEvents.executor": "Run",
+    "Application.FluxFlatMap.executor": "Run",
+    "Application.FluxGenerate.executor": "Run",
+    "Application.MonoCreate.executor": "Run",
+    "Application.MultiCastFlux.executor": "Run",
+    "Application.ReactiveStreamExercise.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/ali/Training/pulse-reactor",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Application.FluxFlatMap">
     <configuration name="CompoExample" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.akfc.training.reactive.CompoExample" />

@@ -15,4 +15,7 @@ public interface AlertRepository extends R2dbcRepository<AlertEntity, Long> {
 
     /** Alertes portant sur une métrique donnée (query method dérivée). */
     Flux<AlertEntity> findByMetricName(String metricName);
+
+    /** Alertes créées par un utilisateur donné (lab J4-2 A) — sert l'endpoint « mes alertes ». */
+    Flux<AlertEntity> findByCreatedBy(String createdBy);
 }

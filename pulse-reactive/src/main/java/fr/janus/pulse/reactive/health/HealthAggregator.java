@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -20,6 +21,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.retry.Retry;
 
 /**
@@ -59,19 +61,37 @@ public class HealthAggregator {
 
     private static final String BULKHEAD_NAME = "upstreams";
 
+    /** Coût d'une « enrichissement » synthétique par upstream (scoring/lookup), pour le profiling. */
+    private static final long ENRICHMENT_COST_MS = 40L;
+
     private final WebClient client;
     private final List<PulseUpstreamProperties.Endpoint> endpoints;
     private final CircuitBreakerRegistry circuitBreakers;
     private final BulkheadRegistry bulkheads;
     private final Timer aggregateTimer;
+    /**
+     * Mode d'« enrichissement » du fan-out, levier de profiling du lab J4-2 B :
+     * <ul>
+     *   <li>{@code off} (défaut, prod) : aucun surcoût ;</li>
+     *   <li>{@code blocking} : un appel <strong>bloquant non isolé</strong> ({@code Thread.sleep})
+     *       sur le thread courant — sur l'event-loop Netty c'est le <em>goulot</em> : BlockHound le
+     *       signale en test, et sous charge il affame l'event-loop (p99 qui explose, débit qui
+     *       s'effondre — visible au profil JFR) ;</li>
+     *   <li>{@code offloaded} : le <strong>même</strong> travail bloquant, mais offloadé sur
+     *       {@code boundedElastic} ({@code subscribeOn}) — le correctif : l'event-loop reste libre.</li>
+     * </ul>
+     */
+    private final String fanoutEnrichment;
 
     public HealthAggregator(WebClient.Builder builder, PulseUpstreamProperties properties,
                             CircuitBreakerRegistry circuitBreakers, BulkheadRegistry bulkheads,
-                            MeterRegistry meters) {
+                            MeterRegistry meters,
+                            @Value("${pulse.profiling.fanout-enrichment:off}") String fanoutEnrichment) {
         this.client = builder.baseUrl(properties.baseUrl()).build();
         this.endpoints = properties.endpoints();
         this.circuitBreakers = circuitBreakers;
         this.bulkheads = bulkheads;
+        this.fanoutEnrichment = fanoutEnrichment;
         this.aggregateTimer = Timer.builder("pulse.health.aggregate")
                 .description("Durée d'une agrégation de santé (fan-out)")
                 .register(meters);
@@ -105,8 +125,41 @@ public class HealthAggregator {
                 .transformDeferred(CircuitBreakerOperator.of(breaker))
                 .elapsed() // (latenceMs, réponse)
                 .map(timed -> new UpstreamHealth(endpoint.name(), HealthStatus.UP, timed.getT1()))
+                // Étape d'enrichissement (levier de profiling J4-2 B ; no-op en prod).
+                .transform(this::applyEnrichment)
                 // Repli : timeout / 5xx après retries / circuit ouvert / bulkhead plein → DOWN.
                 .onErrorResume(ex -> Mono.just(new UpstreamHealth(endpoint.name(), HealthStatus.DOWN, -1L)));
+    }
+
+    /**
+     * Applique l'« enrichissement » selon le mode de profiling (lab J4-2 B). En {@code blocking},
+     * le {@code Thread.sleep} s'exécute sur le thread courant — typiquement l'event-loop Netty qui
+     * porte la réponse WebClient : c'est le goulot. En {@code offloaded}, le même travail part sur
+     * {@code boundedElastic}. En {@code off} (défaut), rien n'est ajouté.
+     */
+    private Mono<UpstreamHealth> applyEnrichment(Mono<UpstreamHealth> upstream) {
+        return switch (fanoutEnrichment) {
+            case "blocking" -> upstream.map(health -> {
+                blockingEnrich();
+                return health;
+            });
+            case "offloaded" -> upstream.flatMap(health ->
+                    Mono.fromCallable(() -> {
+                                blockingEnrich();
+                                return health;
+                            })
+                            .subscribeOn(Schedulers.boundedElastic()));
+            default -> upstream;
+        };
+    }
+
+    /** Travail bloquant synthétique (scoring/lookup) : un {@code Thread.sleep} mesurable. */
+    private static void blockingEnrich() {
+        try {
+            Thread.sleep(ENRICHMENT_COST_MS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private static AggregateHealth combine(List<UpstreamHealth> results) {

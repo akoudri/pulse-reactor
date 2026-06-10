@@ -43,6 +43,17 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Sécurité réactive (lab J4-2 A) : apporte spring-security-web/-config réactif et
+             l'auto-config Boot (ReactiveSecurityAutoConfiguration). On déclare NOTRE
+             SecurityWebFilterChain → la chaîne par défaut (mot de passe généré) est remplacée.
+             La sécurité est purement réactive : le filtre s'insère dans la chaîne WebFilter de
+             Netty et le SecurityContext circule dans le Context Reactor (lu via
+             ReactiveSecurityContextHolder), jamais via un ThreadLocal nu. Version via le BOM. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!-- Observabilité (lab J3-2 D) : Actuator + registry Prometheus → /actuator/prometheus.
              Métriques d'ingestion / agrégation / ouvertures de circuit via Micrometer.
              NB tracing : on ne branche PAS de bridge Micrometer Tracing (brave/otel) ici — il
@@ -104,6 +115,16 @@
             <version>${resilience4j.version}</version>
         </dependency>
 
+        <!-- Profiling réactif (lab J4-2 B) : reactor-tools fournit ReactorDebugAgent, qui
+             instrumente les opérateurs pour reconstituer une stacktrace d'assemblage lisible
+             (le « où » d'une erreur dans un pipeline async). Activé à la demande au démarrage
+             (ReactorDebugAgent.init(), gardé par une propriété — cf. PulseReactiveApplication),
+             jamais en production par défaut (surcoût). Version via le BOM Reactor (Boot 4). -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-tools</artifactId>
+        </dependency>
+
         <!-- Propagation de contexte (Partie D) : SPI Micrometer qui ponte le Context
              Reactor et les ThreadLocal (MDC). Requis par
              Hooks.enableAutomaticContextPropagation(). Version via le BOM. -->
@@ -125,6 +146,15 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-webflux-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Support de test de la sécurité réactive (lab J4-2 A) : SecurityMockServerConfigurers
+             (springSecurity(), mockUser(), mockJwt()) pour injecter un principal dans le
+             SecurityContext réactif sans vrai login, et @WithMockUser pour les tests de méthode.
+             Version via le BOM Boot. -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- Intégration Testcontainers ↔ Boot (lab J4-1 C) : fournit @ServiceConnection, qui

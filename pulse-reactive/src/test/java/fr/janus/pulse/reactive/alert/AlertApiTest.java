@@ -17,6 +17,7 @@ import fr.janus.pulse.reactive.AbstractPostgresIntegrationTest;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 /**
  * Vérifie le contrat HTTP de l'API d'alertes via {@link WebTestClient} lié au contexte
@@ -37,7 +38,13 @@ class AlertApiTest extends AbstractPostgresIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        client = WebTestClient.bindToApplicationContext(context).build();
+        // L'API est désormais sécurisée (lab J4-2 A) : on authentifie le client en HTTP Basic
+        // (utilisateur en mémoire défini dans SecurityConfig). La preuve d'association au
+        // principal et l'isolation entre utilisateurs sont couvertes par AlertSecurityTest.
+        client = WebTestClient.bindToApplicationContext(context)
+                .configureClient()
+                .filter(basicAuthentication("user", "password"))
+                .build();
     }
 
     @Test

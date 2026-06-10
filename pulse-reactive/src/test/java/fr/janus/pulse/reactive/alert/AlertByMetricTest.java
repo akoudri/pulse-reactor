@@ -13,6 +13,8 @@ import fr.janus.pulse.common.AlertRule;
 import fr.janus.pulse.common.Severity;
 import fr.janus.pulse.reactive.AbstractPostgresIntegrationTest;
 
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
+
 /**
  * Vérifie l'agrégat {@code GET /api/alerts/by-metric} (DatabaseClient, GROUP BY) de bout en
  * bout via {@link WebTestClient} contre une PostgreSQL Testcontainers.
@@ -27,7 +29,10 @@ class AlertByMetricTest extends AbstractPostgresIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        client = WebTestClient.bindToApplicationContext(context).build();
+        client = WebTestClient.bindToApplicationContext(context)
+                .configureClient()
+                .filter(basicAuthentication("user", "password"))
+                .build();
     }
 
     @Test

@@ -23,6 +23,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.serviceUnavailable;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 /**
  * Vérifie le fan-out {@code /api/health/aggregate} contre des upstreams stubbés par
@@ -63,7 +64,11 @@ class HealthAggregateTest extends AbstractPostgresIntegrationTest {
         wireMock.resetAll();
         // Repart d'un état circuit propre : l'état est partagé (bean singleton) entre les tests.
         circuitBreakers.getAllCircuitBreakers().forEach(CircuitBreaker::reset);
-        client = WebTestClient.bindToApplicationContext(context).build();
+        // /api/health/aggregate est sécurisé (lab J4-2 A) → auth HTTP Basic.
+        client = WebTestClient.bindToApplicationContext(context)
+                .configureClient()
+                .filter(basicAuthentication("user", "password"))
+                .build();
     }
 
     @Test

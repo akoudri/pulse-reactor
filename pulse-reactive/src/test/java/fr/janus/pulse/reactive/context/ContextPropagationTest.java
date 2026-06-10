@@ -18,6 +18,7 @@ import fr.janus.pulse.reactive.alert.AlertController;
 import fr.janus.pulse.reactive.alert.AlertService;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 /**
  * Prouve la <strong>propagation de contexte</strong> de bout en bout : un appel HTTP portant
@@ -42,7 +43,10 @@ class ContextPropagationTest extends AbstractPostgresIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        client = WebTestClient.bindToApplicationContext(context).build();
+        client = WebTestClient.bindToApplicationContext(context)
+                .configureClient()
+                .filter(basicAuthentication("user", "password"))
+                .build();
         appender = new ListAppender<>();
         appender.start();
         controllerLogger = (Logger) LoggerFactory.getLogger(AlertController.class);

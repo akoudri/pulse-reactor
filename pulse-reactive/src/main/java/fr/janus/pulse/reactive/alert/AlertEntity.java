@@ -27,6 +27,11 @@ import fr.janus.pulse.common.Severity;
  *                   « magique » d'Hibernate, la conversion String↔enum passe par le
  *                   ConversionService de Spring)
  * @param createdAt  instant de création
+ * @param createdBy  utilisateur ayant créé l'alerte (lab J4-2 A), issu du principal lu via
+ *                   {@code ReactiveSecurityContextHolder} dans le pipeline de création. Reste
+ *                   <em>interne à la persistance</em> : il n'est pas exposé dans le DTO
+ *                   {@link fr.janus.pulse.common.Alert} (contrat partagé inchangé), mais sert
+ *                   à filtrer « mes alertes » ({@code findByCreatedBy}).
  */
 @Table("alert")
 public record AlertEntity(
@@ -34,10 +39,12 @@ public record AlertEntity(
         @Column("metric_name") String metricName,
         @Column("threshold") double threshold,
         @Column("severity") Severity severity,
-        @Column("created_at") Instant createdAt) {
+        @Column("created_at") Instant createdAt,
+        @Column("created_by") String createdBy) {
 
-    /** Nouvelle entité non encore persistée (id null → insert). */
-    static AlertEntity newAlert(String metricName, double threshold, Severity severity, Instant createdAt) {
-        return new AlertEntity(null, metricName, threshold, severity, createdAt);
+    /** Nouvelle entité non encore persistée (id null → insert), associée à {@code createdBy}. */
+    static AlertEntity newAlert(String metricName, double threshold, Severity severity,
+                                Instant createdAt, String createdBy) {
+        return new AlertEntity(null, metricName, threshold, severity, createdAt, createdBy);
     }
 }

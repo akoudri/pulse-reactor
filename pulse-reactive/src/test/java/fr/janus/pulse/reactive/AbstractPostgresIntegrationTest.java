@@ -14,13 +14,18 @@ import org.springframework.test.context.TestPropertySource;
  * neuve. Tous les {@code @SpringBootTest} héritent de ce socle : l'{@code @Import} et le
  * {@code @TestPropertySource} sont repris via la hiérarchie de classes de test.
  *
- * <p>Seules propriétés <em>métier</em> conservées ici : on éteint les <strong>deux</strong>
- * simulateurs d'agents par défaut, sinon ils publieraient en continu pendant les tests —
- * {@code AgentSimulator} (producteur Kafka, {@code pulse.ingestion.simulator.enabled}) et
- * {@code MetricSimulator} (push direct dans le {@code MetricStream}, {@code pulse.simulator.enabled}).
- * Ce dernier court-circuite Kafka : laissé actif, ses échantillons « agent-sim » polluent le flux
- * chaud partagé et devancent ceux produits par les tests. Les tests qui ont besoin du
- * {@code @KafkaListener} réactivent {@code spring.kafka.listener.auto-startup} localement.
+ * <p>Propriétés <em>métier</em> conservées ici : on éteint les <strong>deux</strong> simulateurs
+ * par défaut, sinon ils pollueraient le flux pendant les tests. Attention au piège : il y en a deux,
+ * de portées différentes.
+ * <ul>
+ *   <li>{@code pulse.ingestion.simulator.enabled} — {@code AgentSimulator}, producteur <em>Kafka</em>.</li>
+ *   <li>{@code pulse.simulator.enabled} — {@code MetricSimulator}, qui pousse {@code agent-sim}
+ *       <strong>directement</strong> dans le {@code MetricStream} (pont hot partagé), en
+ *       court-circuitant Kafka. Oublier de l'éteindre fait gagner ses échantillons {@code agent-sim}
+ *       contre le message attendu d'un test (symptôme : {@code expected agent-e2e but was agent-sim}).</li>
+ * </ul>
+ * Les tests qui ont besoin du {@code @KafkaListener} réactivent {@code spring.kafka.listener.auto-startup}
+ * localement.
  */
 @Import(PulseTestContainers.class)
 @TestPropertySource(properties = {

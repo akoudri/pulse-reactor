@@ -36,6 +36,7 @@ import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 /**
  * Test <strong>bout-en-bout</strong> (lab J4-1 C) : on publie sur Kafka et on vérifie que le
@@ -89,6 +90,8 @@ class KafkaToSseEndToEndTest extends AbstractPostgresIntegrationTest {
         WebTestClient client = WebTestClient.bindToServer()
                 .baseUrl("http://localhost:" + port)
                 .responseTimeout(Duration.ofSeconds(30))
+                // /api/metrics/stream est sécurisé (lab J4-2 A) → auth HTTP Basic.
+                .filter(basicAuthentication("user", "password"))
                 .build();
 
         // Capture les logs du pont pour prouver la corrélation du traceId à l'ingestion.

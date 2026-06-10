@@ -10,6 +10,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import fr.janus.pulse.reactive.AbstractPostgresIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
 
 /**
  * Vérifie que {@code /actuator/prometheus} expose les métriques d'ingestion, d'agrégation et
@@ -29,7 +30,11 @@ class PrometheusMetricsTest extends AbstractPostgresIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        client = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
+        // /api/health/aggregate est sécurisé (lab J4-2 A) → on authentifie ; /actuator/prometheus
+        // reste ouvert (permitAll), l'en-tête Basic est alors simplement ignoré.
+        client = WebTestClient.bindToServer().baseUrl("http://localhost:" + port)
+                .filter(basicAuthentication("user", "password"))
+                .build();
     }
 
     @Test
